@@ -4,7 +4,7 @@ import rasterio
 import rasterio.merge
 import rasterio.plot
 
-DOWNLOAD_FOLDER_PATH = "./downloaded/"
+FOLDER_NAMES = ["Vietnam_2014-2016_summer_may_october", "Vietnam_2014-2016_monsoon_june_november"]
 
 
 def open_raster_files(folder_path):
@@ -12,24 +12,27 @@ def open_raster_files(folder_path):
     return list(map(rasterio.open, raster_paths))
 
 
-print("Merging raster files...")
-raster_files = open_raster_files(DOWNLOAD_FOLDER_PATH)
-merged_result, out_transform = rasterio.merge.merge(raster_files)
-print("Raster files merged")
+for folder_name in FOLDER_NAMES:
+    folder_path = './' + folder_name + '/'
 
-metadata = raster_files[0].meta.copy()
-metadata.update({
-    "driver": "GTiff",
-    "height": merged_result.shape[1],
-    "width": merged_result.shape[2],
-    "transform": out_transform,
-    "crs": raster_files[0].crs.to_proj4()
-})
+    print("Merging raster files...")
+    raster_files = open_raster_files(folder_path)
+    merged_result, out_transform = rasterio.merge.merge(raster_files)
+    print("Raster files merged")
 
-print("Writing merged raster to disk...")
+    metadata = raster_files[0].meta.copy()
+    metadata.update({
+        "driver": "GTiff",
+        "height": merged_result.shape[1],
+        "width": merged_result.shape[2],
+        "transform": out_transform,
+        "crs": raster_files[0].crs.to_proj4()
+    })
 
-# Write merged raster to disk
-with rasterio.open('merged.tif', "w", **metadata) as dest:
-    dest.write(merged_result)
+    print("Writing merged raster to disk...")
 
-print("Finished writing to disk")
+    # Write merged raster to disk
+    with rasterio.open(folder_path + 'merged.tif', "w", **metadata) as dest:
+        dest.write(merged_result)
+
+    print("Finished writing to disk")

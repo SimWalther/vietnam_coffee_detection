@@ -1,5 +1,21 @@
 import ee
 import time
+from datetime import datetime
+
+# Initialize Google Earth Engine library
+ee.Initialize()
+
+# Landsat 8 collection
+SATELLITE_DATASET = "LANDSAT/LC08/C01/T1_SR"
+
+# Rectangle region of interest
+REGION_RECTANGLE = ee.Geometry.Rectangle([
+    106.9998606274592134, 10.9999604855719539,
+    109.0000494390797456, 15.5002505644255208
+])
+
+# Country name to retrieve country geometry
+COUNTRY_NAME = 'Vietnam'
 
 
 def country_geometry(country_name):
@@ -40,49 +56,49 @@ def start_task(task):
         elif status['state'] == 'CANCEL_REQUESTED':
             break
 
-    time.sleep(30)
+        time.sleep(30)
 
 
-# Initialize Google Earth Engine library
-ee.Initialize()
-
-# Initial date (inclusive)
+# start date (inclusive)
 # Min start date is '2013-04-11'
-start_date = '2014-01-14'
-
-# Final date (exclusive)
+# end date (exclusive)
 # Max end date is '2021-01-22'
-end_date = '2014-03-04'
+def create_image_collection(start_date, end_date):
+    # Select Landsat 8 dataset
+    return ee.ImageCollection(SATELLITE_DATASET) \
+        .filterDate(start_date, end_date) \
+        .filterBounds(REGION_RECTANGLE) \
+        .map(mask_clouds)
 
-# Set region of interest
-region = ee.Geometry.Rectangle([106.9998606274592134, 10.9999604855719539, 109.0000494390797456, 15.5002505644255208])
 
-# Get Vietnam geometry
-vietnam_region = country_geometry('Vietnam')
+def create_export_task(img, folder_name):
+    # Create an export to drive task
+    return ee.batch.Export.image.toDrive(img, 'Vietnam', **{
+        'folder': folder_name,
+        'scale': 30,
+        'maxPixels': 200_000_000,
+        'fileFormat': 'GeoTIFF',
+        'region': REGION_RECTANGLE
+    })
 
-# Landsat 8 collection
-image_collection = "LANDSAT/LC08/C01/T1_SR"
 
-# Select Landsat 8 dataset
-dataset = ee.ImageCollection(image_collection) \
-    .filterDate(start_date, end_date) \
-    .filterBounds(region) \
-    .map(mask_clouds)
+def image_collection_to_median_img(image_collection):
+    country_region = country_geometry(COUNTRY_NAME)
 
-# Reduce collection by median
-landsat8_img = dataset.median()
+    # Reduce collection by median
+    # and Clip image to keep only the region of interest that is inside the country
+    return image_collection.median().clip(REGION_RECTANGLE).clip(country_region)
 
-# Clip image to keep only the region of interest that is inside Vietnam
-landsat8_img_clipped = landsat8_img.clip(region).clip(vietnam_region)
 
-# Create an export to drive task
-export_task = ee.batch.Export.image.toDrive(landsat8_img_clipped, 'Vietnam', **{
-    'folder': 'TB',
-    'scale': 30,
-    'maxPixels': 200_000_000,
-    'fileFormat': 'GeoTIFF',
-    'region': region
-})
+image_collection_2014 = create_image_collection('2014-06-01', '2014-12-01')
+image_collection_2015 = create_image_collection('2015-06-01', '2015-12-01')
+image_collection_2016 = create_image_collection('2016-06-01', '2016-12-01')
+merged_image_collections = image_collection_2014 \
+    .merge(image_collection_2015) \
+    .merge(image_collection_2016) \
+
+median_img = image_collection_to_median_img(merged_image_collections)
+export_task = create_export_task(median_img, COUNTRY_NAME + '_' + datetime.now().strftime("%d-%m-%Y_%H:%M:%S"))
 
 # Start the task
 start_task(export_task)
