@@ -90,15 +90,79 @@ def image_collection_to_median_img(image_collection):
     return image_collection.median().clip(REGION_RECTANGLE).clip(country_region)
 
 
-image_collection_2014 = create_image_collection('2014-06-01', '2014-12-01')
-image_collection_2015 = create_image_collection('2015-06-01', '2015-12-01')
-image_collection_2016 = create_image_collection('2016-06-01', '2016-12-01')
+# -------------------------- DRY SEASON
+# image_collection_2016 = create_image_collection('2016-11-01', '2017-05-01')
+# image_collection_2017 = create_image_collection('2017-11-01', '2018-05-01')
+# image_collection_2018 = create_image_collection('2018-11-01', '2019-05-01')
+
+# -------------------------- WET SEASON
+# image_collection_2016 = create_image_collection('2016-05-01', '2016-10-01')
+# image_collection_2017 = create_image_collection('2017-05-01', '2017-10-01')
+# image_collection_2018 = create_image_collection('2018-05-01', '2018-10-01')
+#
+# merged_image_collections = image_collection_2016 \
+#     .merge(image_collection_2017) \
+#     .merge(image_collection_2018)
+
+# -------------------------- 2 MONTHS
+# image_collection_2014 = create_image_collection('2014-01-01', '2014-03-01')
+# image_collection_2015 = create_image_collection('2015-01-01', '2015-03-01')
+# image_collection_2016 = create_image_collection('2016-01-01', '2016-03-01')
+# image_collection_2017 = create_image_collection('2017-01-01', '2017-03-01')
+# image_collection_2018 = create_image_collection('2018-01-01', '2018-03-01')
+# image_collection_2019 = create_image_collection('2019-01-01', '2019-03-01')
+# image_collection_2020 = create_image_collection('2020-01-01', '2020-03-01')
+
+# image_collection_2014 = create_image_collection('2014-03-01', '2014-05-01')
+# image_collection_2015 = create_image_collection('2015-03-01', '2015-05-01')
+# image_collection_2016 = create_image_collection('2016-03-01', '2016-05-01')
+# image_collection_2017 = create_image_collection('2017-03-01', '2017-05-01')
+# image_collection_2018 = create_image_collection('2018-03-01', '2018-05-01')
+# image_collection_2019 = create_image_collection('2019-03-01', '2019-05-01')
+# image_collection_2020 = create_image_collection('2020-03-01', '2020-05-01')
+#
+# image_collection_2014 = create_image_collection('2014-05-01', '2014-07-01')
+# image_collection_2015 = create_image_collection('2015-05-01', '2015-07-01')
+# image_collection_2016 = create_image_collection('2016-05-01', '2016-07-01')
+# image_collection_2017 = create_image_collection('2017-05-01', '2017-07-01')
+# image_collection_2018 = create_image_collection('2018-05-01', '2018-07-01')
+# image_collection_2019 = create_image_collection('2019-05-01', '2019-07-01')
+# image_collection_2020 = create_image_collection('2020-05-01', '2020-07-01')
+#
+# image_collection_2014 = create_image_collection('2014-07-01', '2014-09-01')
+# image_collection_2015 = create_image_collection('2015-07-01', '2015-09-01')
+# image_collection_2016 = create_image_collection('2016-07-01', '2016-09-01')
+# image_collection_2017 = create_image_collection('2017-07-01', '2017-09-01')
+# image_collection_2018 = create_image_collection('2018-07-01', '2018-09-01')
+# image_collection_2019 = create_image_collection('2019-07-01', '2019-09-01')
+# image_collection_2020 = create_image_collection('2020-07-01', '2020-09-01')
+#
+# image_collection_2014 = create_image_collection('2014-09-01', '2014-11-01')
+# image_collection_2015 = create_image_collection('2015-09-01', '2015-11-01')
+# image_collection_2016 = create_image_collection('2016-09-01', '2016-11-01')
+# image_collection_2017 = create_image_collection('2017-09-01', '2017-11-01')
+# image_collection_2018 = create_image_collection('2018-09-01', '2018-11-01')
+# image_collection_2019 = create_image_collection('2019-09-01', '2019-11-01')
+# image_collection_2020 = create_image_collection('2020-09-01', '2020-11-01')
+#
+image_collection_2014 = create_image_collection('2014-11-01', '2015-01-01')
+image_collection_2015 = create_image_collection('2015-11-01', '2016-01-01')
+image_collection_2016 = create_image_collection('2016-11-01', '2017-01-01')
+image_collection_2017 = create_image_collection('2017-11-01', '2018-01-01')
+image_collection_2018 = create_image_collection('2018-11-01', '2019-01-01')
+image_collection_2019 = create_image_collection('2019-11-01', '2020-01-01')
+image_collection_2020 = create_image_collection('2020-11-01', '2021-01-01')
+
 merged_image_collections = image_collection_2014 \
     .merge(image_collection_2015) \
     .merge(image_collection_2016) \
+    .merge(image_collection_2017) \
+    .merge(image_collection_2018) \
+    .merge(image_collection_2019) \
+    .merge(image_collection_2020)
 
 median_img = image_collection_to_median_img(merged_image_collections)
-export_task = create_export_task(median_img, COUNTRY_NAME + '_' + datetime.now().strftime("%d-%m-%Y_%H:%M:%S"))
+export_task = create_export_task(median_img, COUNTRY_NAME + '_6')
 
 # Start the task
 start_task(export_task)

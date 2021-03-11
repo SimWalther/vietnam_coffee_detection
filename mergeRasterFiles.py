@@ -4,7 +4,14 @@ import rasterio
 import rasterio.merge
 import rasterio.plot
 
-FOLDER_NAMES = ["Vietnam_2014-2016_summer_may_october", "Vietnam_2014-2016_monsoon_june_november"]
+FOLDER_NAMES = [
+    "Vietnam_01_02",
+    "Vietnam_03_04",
+    "Vietnam_05_06",
+    "Vietnam_07_08",
+    "Vietnam_09_10",
+    "Vietnam_11_12"
+]
 
 
 def open_raster_files(folder_path):
