@@ -5,12 +5,7 @@ import rasterio.merge
 import rasterio.plot
 
 FOLDER_NAMES = [
-    "Vietnam_01_02",
-    "Vietnam_03_04",
-    "Vietnam_05_06",
-    "Vietnam_07_08",
-    "Vietnam_09_10",
-    "Vietnam_11_12"
+    "Vietnam_2014_2020"
 ]
 
 
