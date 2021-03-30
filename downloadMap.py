@@ -89,6 +89,7 @@ def image_collection_to_median_img(image_collection):
     # and Clip image to keep only the region of interest that is inside the country
     return image_collection.median().clip(REGION_RECTANGLE).clip(country_region)
 
+
 # -------------------------- DRY SEASON
 # image_collection_2016 = create_image_collection('2016-11-01', '2017-05-01')
 # image_collection_2017 = create_image_collection('2017-11-01', '2018-05-01')
@@ -153,10 +154,20 @@ def image_collection_to_median_img(image_collection):
 # image_collection_2020 = create_image_collection('2020-11-01', '2021-01-01')
 
 # -------------------------- 2014 - 2020
-image_collection = create_image_collection('2014-01-01', '2021-01-01')
+# image_collection = create_image_collection('2014-01-01', '2021-01-01')
+
+# -------------------------- January to april, 2017
+# image_collection = create_image_collection('2017-01-01', '2017-05-01')
+
+# -------------------------- January to March, 2017
+# image_collection = create_image_collection('2017-01-01', '2017-03-01')
+
+# -------------------------- March to April, 2017
+image_collection = create_image_collection('2017-03-01', '2017-05-01')
+
 
 median_img = image_collection_to_median_img(image_collection)
-export_task = create_export_task(median_img, '2014_2020')
+export_task = create_export_task(median_img, '2017_march_april')
 
 # Start the task
 start_task(export_task)
