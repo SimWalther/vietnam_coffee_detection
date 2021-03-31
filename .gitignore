@@ -1,9 +1,4 @@
 .idea/
 .ipynb_checkpoints/
-2020_MachLe_PW10/
 ee
-
-*.tmp
-*.tif
-*.aux.xml
-
+data/
