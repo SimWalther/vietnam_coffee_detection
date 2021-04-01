@@ -36,9 +36,9 @@ def dataframe_from_labels_values(labels_values, columns, group_names):
     return normalize_dataframe(concat_df, columns)
 
 
-def statistics(raster_paths, labels, group_names, labels_coordinates_list, title='', describe_stats=False, asc_std_by_bands=False, draw_boxplot=True):
+def statistics(raster_paths, labels, group_names, labels_coordinates_list, title='', describe_stats=False, asc_std_by_bands=False, draw_boxplot=True, nb_pixel_around=4):
     # Get values for each label we are interested in
-    labels_values = labels_values_from_raster_files(labels, raster_paths, labels_coordinates_list)
+    labels_values = labels_values_from_raster_files(labels, raster_paths, labels_coordinates_list, nb_pixel_around)
 
     columns = ['coastal aerosol', 'blue', 'green', 'red', 'nir', 'swir 1', 'swir 2', 'panchromatic']
     df = dataframe_from_labels_values(labels_values, columns, group_names)
