@@ -69,3 +69,15 @@ def statistics(raster_paths, labels, group_names, labels_coordinates_list, title
 
             for std in std_asc:
                 print(std[0], ": ", std[1])
+
+
+# See: https://stackoverflow.com/questions/48100173/how-to-get-precision-recall-and-f-measure-from-confusion-matrix-in-python
+def recall_precision_fscore_from_confusion_matrix(conf_matrix):
+    tp = np.diag(conf_matrix)
+    fp = np.sum(conf_matrix, axis=0) - tp
+    fn = np.sum(conf_matrix, axis=1) - tp
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    fscore = 2 * recall * precision / (recall + precision)
+
+    return recall, precision, fscore

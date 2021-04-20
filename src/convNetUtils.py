@@ -3,12 +3,9 @@ from rasterio.plot import reshape_as_image
 from math import floor
 import matplotlib.pyplot as pl
 from sklearn.utils import class_weight
-from keras.models import Model
-from keras.layers.core import Dense, Dropout, Flatten
-from keras.utils import np_utils, to_categorical
-from keras.layers.convolutional import Conv2D, MaxPooling2D
-from keras.layers import Input
-from keras.layers.experimental.preprocessing import Rescaling
+from sklearn import metrics as me
+from keras.models import clone_model
+from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator
 
 
@@ -37,30 +34,6 @@ def k_fold_indices(dataset, k=5):
         fold_start = fold_end
 
     return folds_indices
-
-
-def create_model(image_width, image_height, image_depth, nb_outputs):
-    inputs = Input(shape=(image_width, image_height, image_depth))
-
-    # Add layers of convolution and pooling
-    model_layers = Rescaling(1./2**16)(inputs)
-    model_layers = Conv2D(filters=8, kernel_size=(3, 3), padding="same", activation="relu")(model_layers)
-    model_layers = Conv2D(filters=8, kernel_size=(3, 3), padding="same", activation="relu")(model_layers)
-    model_layers = MaxPooling2D(pool_size=(2, 2))(model_layers)
-    model_layers = Conv2D(filters=16, kernel_size=(2, 2), padding="same", activation="relu")(model_layers)
-    model_layers = Conv2D(filters=16, kernel_size=(2, 2), padding="same", activation="relu")(model_layers)
-    model_layers = MaxPooling2D(pool_size=(2, 2))(model_layers)
-    model_layers = Flatten(name='flat')(model_layers)
-    model_layers = Dense(256, activation='relu')(model_layers)
-    model_layers = Dropout(0.5)(model_layers)
-    outputs = Dense(nb_outputs, activation='softmax')(model_layers)
-
-    model = Model(inputs=inputs, outputs=outputs)
-
-    # Specify optimizer and loss function
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-    return model
 
 
 def train_model(model, X_train, Y_train, X_test, Y_test, class_weights, epochs, steps_per_epoch):
@@ -105,47 +78,50 @@ def split_fold_into_train_test_sets(dataset, fold_start, fold_end, bands, labels
     return X_train, y_train, Y_train, X_test, y_test, Y_test
 
 
-def cross_validation(dataset, bands, labels, labels_names, epochs, k=5):
-    np.random.shuffle(dataset)
-
+def cross_validation(model, dataset, bands, labels, labels_names, epochs, nb_cross_validations=1, k=5):
     histories = []
-
-    # images have all the same shapes, take the shape of the first image
-    image_width = len(dataset[0][1][0][0])
-    image_height = len(dataset[0][1][0])
-    image_depth = len(bands)
-
     mean_loss = 0
     mean_accuracy = 0
+    conf_matrix = np.zeros((len(labels_names), len(labels_names)))
 
-    for i, fold_indices in enumerate(k_fold_indices(dataset, k)):
-        X_train, y_train, Y_train, X_test, y_test, Y_test = split_fold_into_train_test_sets(
-            dataset, fold_indices[0], fold_indices[1], bands, labels_names, len(labels)
-        )
+    model.summary()
 
-        # Compute each classes weight
-        class_weights = class_weight.compute_class_weight(class_weight='balanced', classes=np.unique(y_train), y=y_train)
-        class_weights = dict(enumerate(class_weights))
+    for cross_validation in range(nb_cross_validations):
+        np.random.shuffle(dataset)
 
-        model = create_model(image_width, image_height, image_depth, len(labels))
+        for fold, fold_indices in enumerate(k_fold_indices(dataset, k)):
+            X_train, y_train, Y_train, X_test, y_test, Y_test = split_fold_into_train_test_sets(
+                dataset, fold_indices[0], fold_indices[1], bands, labels_names, len(labels)
+            )
 
-        # Print the model summary, only one time
-        if i == 0:
-            model.summary()
+            # Compute each classes weight
+            class_weights = class_weight.compute_class_weight(class_weight='balanced', classes=np.unique(y_train), y=y_train)
+            class_weights = dict(enumerate(class_weights))
 
-        print("\nFold", i, ":\n--------\n")
+            # clone given model without keeping the layers weights
+            current_model = clone_model(model)
 
-        # fit model
-        history = train_model(model, X_train, Y_train, X_test, Y_test, class_weights, epochs, len(y_train) / 32)
-        histories.append(history)
+            # Specify optimizer and loss function
+            current_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-        # Evaluate model
-        score = model.evaluate(X_test, Y_test, verbose=0)
+            print("\nFold ", (fold + 1), ":\n--------\n")
 
-        mean_loss += score[0] / k
-        mean_accuracy += score[1] / k
+            # fit model
+            history = train_model(current_model, X_train, Y_train, X_test, Y_test, class_weights, epochs, len(y_train) / 32)
+            histories.append(history)
 
-    return mean_loss, mean_accuracy, histories
+            # Evaluate model
+            score = current_model.evaluate(X_test, Y_test, verbose=0)
+
+            mean_loss += score[0] / (k * nb_cross_validations)
+            mean_accuracy += score[1] / (k * nb_cross_validations)
+
+            # Add current confusion matrix to the global confusion matrix
+            pred = current_model.predict_on_batch(X_test)
+            pred = np.argmax(pred, axis=-1)
+            conf_matrix += me.confusion_matrix(y_test, pred)
+
+    return mean_loss, mean_accuracy, histories, conf_matrix
 
 
 def images_from_dataset(dataset, bands):
@@ -165,6 +141,25 @@ def images_from_dataset(dataset, bands):
 def labels_from_dataset(dataset, labels):
     return np.array([labels.index(img[0]) for img in dataset])
 
+
+def add_ndvi_to_dataset(dataset):
+    for i, img in enumerate(dataset):
+        red = np.asarray(img[1][3])
+        nir = np.asarray(img[1][4])
+        ndvi = (nir - red) / (nir + red)
+        dataset[i][1].append(ndvi.tolist())
+
+    return dataset
+
+
+def add_mndwi_to_dataset(dataset):
+    for i, img in enumerate(dataset):
+        green = np.asarray(img[1][2])
+        swir = np.asarray(img[1][5])
+        mndwi = (green - swir) / (green + swir)
+        dataset[i][1].append(mndwi.tolist())
+
+    return dataset
 
 # def compute_min_max_per_channel(dataset, bands):
 #     min_per_channel = []
