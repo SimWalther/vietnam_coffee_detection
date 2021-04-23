@@ -3,3 +3,5 @@
 ee
 data/
 *.pyc
+divers/
+.~lock.*.fods#
