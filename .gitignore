@@ -4,4 +4,4 @@ ee
 data/
 *.pyc
 divers/
-.~lock.*.fods#
+.~lock.*
