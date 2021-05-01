@@ -2,6 +2,7 @@ import rasterio
 import shapely.geometry
 import rasterio.mask
 from rasterio.plot import reshape_as_image
+
 import numpy as np
 import geojson
 
@@ -68,7 +69,7 @@ def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list
                         lon = coordinates[1]
                         point = geojson.Point((lat, lon))
 
-                        # Don't add data if there are 'NaN' values
+                        # Don't add data if there is 'NaN' values
                         if not np.isnan(out_img).any():
                             values.append([label.name, out_img.tolist(), point])
 

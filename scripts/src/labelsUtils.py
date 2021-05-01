@@ -39,7 +39,7 @@ class Label(Enum):
     WATER_MINE = 33
 
 
-def labels_coordinates_from_files(paths, boundaries):
+def labels_coordinates_from_files(shapefiles_paths, boundaries):
     # Create a dictionary which will contain all
     # points classified in the opened shapefiles
     # with their coordinates lat-lon
@@ -51,7 +51,7 @@ def labels_coordinates_from_files(paths, boundaries):
 
     # Add each points coordinate
     # in its corresponding class
-    for path in paths:
+    for path in shapefiles_paths:
         for shape_record in shapefile.Reader(path).shapeRecords():
             if shape_record.record.Class <= len(Label):
                 current_list = labels_coordinates.get(shape_record.record.Class)

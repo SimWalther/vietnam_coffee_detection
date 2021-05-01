@@ -90,7 +90,7 @@ def split_fold_into_train_test_sets(dataset, fold_start, fold_end, bands, labels
     return X_train, y_train, Y_train, X_test, y_test, Y_test
 
 
-def train_and_evaluate_fold(X_test, X_train, Y_test, Y_train, y_test, y_train, epochs, fold, model, nb_labels, early_stopping=False):
+def train_and_evaluate_fold(X_test, X_train, Y_test, Y_train, y_test, y_train, epochs, fold, model, nb_labels, early_stopping=False, new_model=True):
     fold_size = len(y_train)
 
     # Compute each classes weight
@@ -102,11 +102,15 @@ def train_and_evaluate_fold(X_test, X_train, Y_test, Y_train, y_test, y_train, e
 
     class_weights = dict(enumerate(class_weights))
 
-    # clone given model without keeping the layers weights
-    current_model = clone_model(model)
+    if new_model:
+        # clone given model without keeping the layers weights
+        current_model = clone_model(model)
 
-    # Specify optimizer and loss function
-    current_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        # Specify optimizer and loss function
+        current_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    else:
+        current_model = model
+
     print("\nFold ", (fold + 1), ":\n--------\n")
 
     # fit model
@@ -163,10 +167,55 @@ def cross_validation(model, dataset, bands, labels, labels_names, epochs, nb_cro
 
             histories.append(history)
             total_conf_matrix += conf_matrix
-            mean_accuracy += accuracy * fold_size / (len(dataset) * k * nb_cross_validations)
-            mean_loss += loss * fold_size / (len(dataset) * k * nb_cross_validations)
+            mean_accuracy += accuracy * fold_size / (len(dataset) * nb_cross_validations)
+            mean_loss += loss * fold_size / (len(dataset) * nb_cross_validations)
 
     return mean_loss, mean_accuracy, histories, total_conf_matrix
+
+
+def cross_validation_with_metrics_evolution(model, dataset, bands, labels, labels_names, epochs, epochs_per_metrics, nb_cross_validations=1, k=5):
+    assert epochs % epochs_per_metrics == 0, "epochs should be dividable by epochs_per_metrics"
+    assert epochs_per_metrics < epochs, "epochs per metrics should be inferior to epochs"
+    assert epochs_per_metrics > 0, "epochs per metrics should be superior to 0"
+
+    nb_labels = len(labels_names)
+    histories = []
+    # Each metrics are shared between folds
+    nb_metrics = epochs // epochs_per_metrics
+    mean_accuracies = np.zeros(nb_metrics)
+    mean_losses = np.zeros(nb_metrics)
+    total_conf_matrices = np.zeros((nb_metrics, len(labels_names), len(labels_names)))
+
+    model.summary()
+
+    for validation in range(nb_cross_validations):
+        np.random.shuffle(dataset)
+
+        for fold, fold_indices in enumerate(k_fold_indices(dataset, k)):
+            X_train, y_train, Y_train, X_test, y_test, Y_test = split_fold_into_train_test_sets(
+                dataset, fold_indices[0], fold_indices[1], bands, labels_names, len(labels)
+            )
+
+            # We must reinitialize the model each fold!
+            current_model = clone_model(model)
+
+            # Specify optimizer and loss function
+            current_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+            for metric in range(nb_metrics):
+                history, conf_matrix, accuracy, loss = train_and_evaluate_fold(
+                    X_test, X_train, Y_test, Y_train, y_test, y_train,
+                    epochs_per_metrics, fold, current_model, nb_labels, early_stopping=False, new_model=False
+                )
+
+                fold_size = len(y_train)
+
+                histories.append(history)
+                total_conf_matrices[metric] += conf_matrix
+                mean_accuracies[metric] += accuracy * fold_size / (len(dataset) * nb_cross_validations)
+                mean_losses[metric] += loss * fold_size / (len(dataset) * nb_cross_validations)
+
+    return mean_losses, mean_accuracies, histories, total_conf_matrices
 
 
 def spatial_cross_validation(model, dataset, bands, labels_names, epochs, nb_cross_validations=1, k=5, early_stopping=False):
@@ -208,8 +257,8 @@ def spatial_cross_validation(model, dataset, bands, labels_names, epochs, nb_cro
 
             histories.append(history)
             total_conf_matrix += conf_matrix
-            mean_accuracy += accuracy * fold_size / (len(dataset) * k * nb_cross_validations)
-            mean_loss += loss * fold_size / (len(dataset) * k * nb_cross_validations)
+            mean_accuracy += accuracy * fold_size / (len(dataset) * nb_cross_validations)
+            mean_loss += loss * fold_size / (len(dataset) * nb_cross_validations)
 
             fold += 1
 
@@ -254,6 +303,29 @@ def add_mndwi_to_dataset(dataset):
     return dataset
 
 
+# This function generates a colored confusion matrix.
+# Adapted from plot_confusion_matrix of MLG course
+def plot_confusion_matrix(confmatrix, labels_names, ax=None):
+    if ax is None:
+        ax = pl.subplot(111)
+
+    ax.matshow(confmatrix, interpolation='nearest', cmap=pl.cm.Blues)
+
+    for i in range(confmatrix.shape[0]):
+        for j in range(confmatrix.shape[1]):
+            ax.annotate(str(confmatrix[i, j]), xy=(j, i),
+                        horizontalalignment='center',
+                        verticalalignment='center',
+                        fontsize=8)
+    ax.set_xticks(np.arange(confmatrix.shape[0]))
+    ax.set_xticklabels([labels_names[label] for label in range(confmatrix.shape[0])], rotation='vertical')
+    ax.set_yticks(np.arange(confmatrix.shape[1]))
+    _ = ax.set_yticklabels([labels_names[label] for label in range(confmatrix.shape[1])])
+    ax.set_xlabel('predicted label')
+    ax.xaxis.set_label_position('top')
+    ax.set_ylabel('true label')
+
+
 # def compute_min_max_per_channel(dataset, bands):
 #     min_per_channel = []
 #     max_per_channel = []
@@ -282,26 +354,3 @@ def add_mndwi_to_dataset(dataset):
 #
 # def normalize(values, min_val, max_val):
 #     return (values - min_val) / (max_val - min_val)
-
-
-# This function generates a colored confusion matrix.
-# Adapted from plot_confusion_matrix of MLG course
-def plot_confusion_matrix(confmatrix, labels_names, ax=None):
-    if ax is None:
-        ax = pl.subplot(111)
-
-    ax.matshow(confmatrix, interpolation='nearest', cmap=pl.cm.Blues)
-
-    for i in range(confmatrix.shape[0]):
-        for j in range(confmatrix.shape[1]):
-            ax.annotate(str(confmatrix[i, j]), xy=(j, i),
-                        horizontalalignment='center',
-                        verticalalignment='center',
-                        fontsize=8)
-    ax.set_xticks(np.arange(confmatrix.shape[0]))
-    ax.set_xticklabels([labels_names[label] for label in range(confmatrix.shape[0])], rotation='vertical')
-    ax.set_yticks(np.arange(confmatrix.shape[1]))
-    _ = ax.set_yticklabels([labels_names[label] for label in range(confmatrix.shape[1])])
-    ax.set_xlabel('predicted label')
-    ax.xaxis.set_label_position('top')
-    ax.set_ylabel('true label')
