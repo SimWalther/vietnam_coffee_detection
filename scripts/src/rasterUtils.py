@@ -1,8 +1,6 @@
 import rasterio
 import shapely.geometry
 import rasterio.mask
-from rasterio.plot import reshape_as_image
-
 import numpy as np
 import geojson
 

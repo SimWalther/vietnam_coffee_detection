@@ -11,8 +11,34 @@ from keras.callbacks import EarlyStopping
 import pandas
 import geopandas as gpd
 import spacv
+import keras
+import numpy as np
 
 DATA_ROOT_PATH = '../data/'
+
+
+# Code taken from: https://medium.com/@thongonary/how-to-compute-f1-score-for-each-epoch-in-keras-a1acd17715a2
+class Metrics(keras.callbacks.Callback):
+    def __init__(self, train, validation):
+        super(Metrics, self).__init__()
+        self.train = train
+        self.validation = validation
+
+    def on_epoch_end(self, epoch, logs={}):
+        target_train = np.argmax(np.asarray(self.train[1]), axis=-1)
+        predicted_train = np.argmax(np.asarray(self.model.predict(self.train[0])), axis=-1)
+        f1_score_train = me.f1_score(target_train, predicted_train, average="macro")
+
+        target_validation = np.argmax(np.asarray(self.validation[1]), axis=-1)
+        predicted_validation = np.argmax(np.asarray(self.model.predict(self.validation[0])), axis=-1)
+        f1_score_val = me.f1_score(target_validation, predicted_validation, average="macro")
+
+        logs['f1_score_train'] = f1_score_train
+        logs['f1_score_val'] = f1_score_val
+        # print(" - f1_score_train: ", f1_score_train)
+        # print(" - f1_score_val: ", f1_score_val)
+
+        return
 
 
 # Adapted from split_dataset of MLG course
@@ -49,26 +75,28 @@ def train_model(model, X_train, Y_train, X_test, Y_test, class_weights, epochs, 
         width_shift_range=0.1,
         height_shift_range=0.1,
         horizontal_flip=True,
-        fill_mode='nearest'
+        fill_mode='nearest',
     )
+
+    batch_size = 32
 
     # create data generator
     datagen = ImageDataGenerator(**data_gen_args)
     datagen.fit(X_train)
-    train_datagen = datagen.flow(X_train, Y_train, batch_size=32)
+    train_datagen = datagen.flow(X_train, Y_train, batch_size=batch_size)
 
-    callbacks = []
+    callbacks = [Metrics(train=(X_train, Y_train), validation=(X_test, Y_test))]
 
     if early_stopping:
-        callbacks.append(EarlyStopping(monitor='val_loss'))
+        callbacks.append(EarlyStopping(monitor='f1_score_val', patience=150, mode="max"))
 
     # Define fit arguments
     fit_args = dict(
         x=train_datagen,
         epochs=epochs,
-        validation_data=(X_test, Y_test),
         class_weight=class_weights,
         steps_per_epoch=steps_per_epoch,
+        validation_data=(X_test, Y_test),
         callbacks=callbacks
     )
 
