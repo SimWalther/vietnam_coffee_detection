@@ -1,4 +1,3 @@
-import numpy as np
 from rasterio.plot import reshape_as_image
 from math import floor
 import matplotlib.pyplot as pl
@@ -14,12 +13,21 @@ import spacv
 import keras
 import numpy as np
 
-DATA_ROOT_PATH = '../data/'
 
-
-# Code taken from: https://medium.com/@thongonary/how-to-compute-f1-score-for-each-epoch-in-keras-a1acd17715a2
 class Metrics(keras.callbacks.Callback):
+    """
+    Keras callback to provides additional metrics.
+    It logs f1-score of the train and validation after each epoch. Those metrics can be used by the early stopping.
+    Code inspired by: https://medium.com/@thongonary/how-to-compute-f1-score-for-each-epoch-in-keras-a1acd17715a2
+    """
+
     def __init__(self, train, validation):
+        """
+        Initialize callback
+        :param train: the train set as a tuple (train set values, correct labels)
+        :param validation: the validation set as (test set values, correct labels)
+        """
+
         super(Metrics, self).__init__()
         self.train = train
         self.validation = validation
@@ -35,20 +43,32 @@ class Metrics(keras.callbacks.Callback):
 
         logs['f1_score_train'] = f1_score_train
         logs['f1_score_val'] = f1_score_val
-        # print(" - f1_score_train: ", f1_score_train)
-        # print(" - f1_score_val: ", f1_score_val)
 
         return
 
 
-# Adapted from split_dataset of MLG course
-def split_dataset(dataset, train_test_ratio=0.8):
+def hold_out_split_dataset(dataset, train_test_ratio=0.8):
+    """
+    Create an split of the dataset by holding out a ratio of the dataset
+    to be used as test set.
+    Adapted from split_dataset of MLG course
+    :param dataset: the dataset to split
+    :param train_test_ratio: the wanted ratio between train and test set
+    :return: the train set and the test set
+    """
     np.random.shuffle(dataset)
     nb_train = int(len(dataset) * train_test_ratio)
     return dataset[:nb_train], dataset[nb_train:]
 
 
 def k_fold_indices(dataset, k=5):
+    """
+    Computes folds indices
+    :param dataset: the dataset
+    :param k: the number of fold
+    :return: an array with the fold start and end indices
+    """
+
     # subdivise dataset in k folds
     folds_indices = []
     fold_size = floor(len(dataset) / k)
@@ -69,6 +89,21 @@ def k_fold_indices(dataset, k=5):
 
 
 def train_model(model, X_train, Y_train, X_test, Y_test, class_weights, epochs, steps_per_epoch, early_stopping=False):
+    """
+    Train a Keras neural network model
+    :param model: the Keras neural network model
+    :param X_train: the image train set
+    :param Y_train: the correct labels of train set in one hot encoding
+    :param X_test: the image test set
+    :param Y_test: the correct labels of test set in one hot encoding
+    :param class_weights: weight of each class. If classes are imbalanced it will gives more importance
+    to underrepresented classes
+    :param epochs: the number of epochs
+    :param steps_per_epoch: the number of steps per epoch
+    :param early_stopping: defines if early stopping is used
+    :return: the train history
+    """
+
     # Define data generator arguments
     data_gen_args = dict(
         rotation_range=45,
@@ -103,7 +138,25 @@ def train_model(model, X_train, Y_train, X_test, Y_test, class_weights, epochs, 
     return model.fit(**fit_args)
 
 
-def split_fold_into_train_test_sets(dataset, fold_start, fold_end, bands, labels_names, nb_classes):
+def split_fold_into_train_test_sets(dataset, fold_start, fold_end, bands, labels_names):
+    """
+    Get train and test sets from a given fold
+    :param dataset: the dataset
+    :param fold_start: start position of the fold in the dataset
+    :param fold_end: end position of the fold in the dataset
+    :param bands: the bands to use
+    :param labels_names: the names of the labels to keep in the dataset
+    :return:
+    the image train set,
+    the correct labels of test set,
+    the correct labels of train set in one hot encoding,
+    the image test set,
+    the correct labels of test set,
+    the correct labels of test set in one hot encoding
+    """
+
+    nb_classes = len(labels_names)
+
     train = dataset[fold_start:fold_end]
     test = dataset[:fold_start] + dataset[fold_end:]
 
@@ -119,6 +172,23 @@ def split_fold_into_train_test_sets(dataset, fold_start, fold_end, bands, labels
 
 
 def train_and_evaluate_fold(X_test, X_train, Y_test, Y_train, y_test, y_train, epochs, fold, model, nb_labels, early_stopping=False, new_model=True):
+    """
+    Train a fold and gives back results
+    :param X_test: the image test set
+    :param X_train: the image train set
+    :param Y_test: the correct labels of test set in one hot encoding
+    :param Y_train: the correct labels of train set in one hot encoding
+    :param y_test: the correct labels of test set
+    :param y_train: the correct labels of test set
+    :param epochs: the number of epochs
+    :param fold: the fold number
+    :param model: the Keras neural network model
+    :param nb_labels: the number of labels
+    :param early_stopping: defines if there is early stopping
+    :param new_model: defines if model should be reset or if the given model weights should be kept
+    :return: history, confusion matrix, accuracy and loss
+    """
+
     fold_size = len(y_train)
 
     # Compute each classes weight
@@ -168,7 +238,21 @@ def train_and_evaluate_fold(X_test, X_train, Y_test, Y_train, y_test, y_train, e
     return history, conf_matrix, accuracy, loss
 
 
-def cross_validation(model, dataset, bands, labels, labels_names, epochs, nb_cross_validations=1, k=5, early_stopping=False):
+def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations=1, k=5, early_stopping=False):
+    """
+    This is a function to do cross validation on a given keras model.
+    :param model: the Keras neural network model
+    :param dataset: the dataset, typically created with make_dataset_from_raster_files
+    :param bands: an array of the position of the bands to use. ex: [3, 2, 1] will select bands Red, Green, Blue
+    if the dataset contains images with all bands. Bands positions start at zero.
+    :param labels: an array of selected labels. Those labels should be entries of Label enum defined in labelsUtils.py
+    :param epochs: the number of epochs
+    :param nb_cross_validations: the number of time to repeat the cross validation.
+    :param k: the number of folds
+    :param early_stopping: defines if early stopping is used
+    :return: mean loss, mean accuracy, array of each history and the confusion matrix
+    """
+    labels_names = [label.name for label in labels]
     nb_labels = len(labels_names)
     histories = []
     mean_loss = 0
@@ -182,7 +266,7 @@ def cross_validation(model, dataset, bands, labels, labels_names, epochs, nb_cro
 
         for fold, fold_indices in enumerate(k_fold_indices(dataset, k)):
             X_train, y_train, Y_train, X_test, y_test, Y_test = split_fold_into_train_test_sets(
-                dataset, fold_indices[0], fold_indices[1], bands, labels_names, len(labels)
+                dataset, fold_indices[0], fold_indices[1], bands, labels_names
             )
 
             history, conf_matrix, accuracy, loss = train_and_evaluate_fold(
@@ -201,11 +285,28 @@ def cross_validation(model, dataset, bands, labels, labels_names, epochs, nb_cro
     return mean_loss, mean_accuracy, histories, total_conf_matrix
 
 
-def cross_validation_with_metrics_evolution(model, dataset, bands, labels, labels_names, epochs, epochs_per_metrics, nb_cross_validations=1, k=5):
+def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epochs, epochs_per_metrics, nb_cross_validations=1, k=5):
+    """
+    Cross validation that stops each n epochs to computes some metrics.
+    Total number of epochs are divided by a number of epochs per metrics to get a number of metrics.
+    Each metrics are shared between folds.
+    :param model: Keras neural network model
+    :param dataset: dataset, typically created with make_dataset_from_raster_files
+    :param bands: an array of the position of the bands to use. ex: [3, 2, 1] will select bands Red, Green, Blue
+    if the dataset contains images with all bands. Bands positions start at zero.
+    :param labels: an array of selected labels. Those labels should be entries of Label enum defined in labelsUtils.py
+    :param epochs: number of epochs
+    :param epochs_per_metrics: number of epochs per metrics
+    :param nb_cross_validations: number of time to repeat the cross validation.
+    :param k: the number of folds
+    :return: Array of mean losses, mean accuracies, histories and confusion matrices. Each position in this array
+    """
+
     assert epochs % epochs_per_metrics == 0, "epochs should be dividable by epochs_per_metrics"
     assert epochs_per_metrics < epochs, "epochs per metrics should be inferior to epochs"
     assert epochs_per_metrics > 0, "epochs per metrics should be superior to 0"
 
+    labels_names = [label.name for label in labels]
     nb_labels = len(labels_names)
     histories = []
     # Each metrics are shared between folds
@@ -221,7 +322,7 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, label
 
         for fold, fold_indices in enumerate(k_fold_indices(dataset, k)):
             X_train, y_train, Y_train, X_test, y_test, Y_test = split_fold_into_train_test_sets(
-                dataset, fold_indices[0], fold_indices[1], bands, labels_names, len(labels)
+                dataset, fold_indices[0], fold_indices[1], bands, labels_names
             )
 
             # We must reinitialize the model each fold!
@@ -246,7 +347,22 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, label
     return mean_losses, mean_accuracies, histories, total_conf_matrices
 
 
-def spatial_cross_validation(model, dataset, bands, labels_names, epochs, nb_cross_validations=1, k=5, early_stopping=False):
+def spatial_cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations=1, early_stopping=False):
+    """
+    Spatial cross validation to train on a region and validate with another
+    :param model:  Keras neural network model
+    :param dataset: dataset, typically created with make_dataset_from_raster_files
+    :param bands: an array of the position of the bands to use. ex: [3, 2, 1] will select bands Red, Green, Blue
+    if the dataset contains images with all bands. Bands positions start at zero.
+    :param labels: an array of selected labels. Those labels should be entries of Label enum defined in labelsUtils.py
+    :param epochs: number of epochs
+    :param nb_cross_validations: number of time to repeat the cross validation
+    :param early_stopping: defines if early stopping is used
+    :return: mean loss, mean accuracy, array of each history and the confusion matrix
+    """
+
+    labels_names = [label.name for label in labels]
+
     nb_labels = len(labels_names)
     histories = []
     mean_loss = 0
@@ -294,12 +410,16 @@ def spatial_cross_validation(model, dataset, bands, labels_names, epochs, nb_cro
 
 
 def images_from_dataset(dataset, bands):
-    # min_per_band, max_per_band = compute_min_max_per_channel(dataset, bands)
-
+    """
+    Extract images from a dateset into a numpy array, while taking only certain bands.
+    Images format is converted from (bands, rows, columns) to (rows, columns, bands)
+    :param dataset: the dataset
+    :param bands: the bands to keep
+    :return: an images array
+    """
     # Filter bands
     dataset = [
         [
-            # normalize(img[1][band], min_per_band[i], max_per_band[i]) for i, band in enumerate(bands)
             img[1][band] for i, band in enumerate(bands)
         ] for img in dataset
     ]
@@ -308,32 +428,23 @@ def images_from_dataset(dataset, bands):
 
 
 def labels_from_dataset(dataset, labels):
+    """
+    Extract labels from a dataset into a numpy array
+    :param dataset: the dataset
+    :param labels: the labels to keep
+    :return: a labels array
+    """
     return np.array([labels.index(img[0]) for img in dataset])
 
 
-def add_ndvi_to_dataset(dataset):
-    for i, img in enumerate(dataset):
-        red = np.asarray(img[1][3])
-        nir = np.asarray(img[1][4])
-        ndvi = (nir - red) / (nir + red)
-        dataset[i][1].append(ndvi.tolist())
-
-    return dataset
-
-
-def add_mndwi_to_dataset(dataset):
-    for i, img in enumerate(dataset):
-        green = np.asarray(img[1][2])
-        swir = np.asarray(img[1][5])
-        mndwi = (green - swir) / (green + swir)
-        dataset[i][1].append(mndwi.tolist())
-
-    return dataset
-
-
-# This function generates a colored confusion matrix.
-# Adapted from plot_confusion_matrix of MLG course
 def plot_confusion_matrix(confmatrix, labels_names, ax=None):
+    """
+    This function generates a colored confusion matrix.
+    Code has been taken and adapted from plot_confusion_matrix of MLG course
+    :param confmatrix: the confusion matrix
+    :param labels_names: labels names
+    :param ax: matplotlib axes object to plot to
+    """
     if ax is None:
         ax = pl.subplot(111)
 
@@ -354,31 +465,21 @@ def plot_confusion_matrix(confmatrix, labels_names, ax=None):
     ax.set_ylabel('true label')
 
 
-# def compute_min_max_per_channel(dataset, bands):
-#     min_per_channel = []
-#     max_per_channel = []
+# def add_ndvi_to_dataset(dataset):
+#     for i, img in enumerate(dataset):
+#         red = np.asarray(img[1][3])
+#         nir = np.asarray(img[1][4])
+#         ndvi = (nir - red) / (nir + red)
+#         dataset[i][1].append(ndvi.tolist())
 #
-#     for band in bands:
-#         band_min = inf
-#         band_max = -inf
+#     return dataset
 #
-#         for img in dataset:
-#             img_values = img[1]
 #
-#             tmp_min = np.min(img_values[band])
-#             tmp_max = np.max(img_values[band])
+# def add_mndwi_to_dataset(dataset):
+#     for i, img in enumerate(dataset):
+#         green = np.asarray(img[1][2])
+#         swir = np.asarray(img[1][5])
+#         mndwi = (green - swir) / (green + swir)
+#         dataset[i][1].append(mndwi.tolist())
 #
-#             if tmp_min < band_min:
-#                 band_min = tmp_min
-#
-#             if tmp_max > band_max:
-#                 band_max = tmp_max
-#
-#         min_per_channel.append(band_min)
-#         max_per_channel.append(band_max)
-#
-#     return min_per_channel, max_per_channel
-
-#
-# def normalize(values, min_val, max_val):
-#     return (values - min_val) / (max_val - min_val)
+#     return dataset
