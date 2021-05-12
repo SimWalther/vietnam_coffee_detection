@@ -41,10 +41,24 @@ SOUTHERN_DISTRICTS = [
 
 
 def shapes_from_geojson(file, names, name_column='Name', geometry_column='geometry'):
+    """
+    Extract shapes from a geojson file
+    :param file: the geojson file
+    :param names: names to keep
+    :param name_column: name of the column where the names are
+    :param geometry_column: name of the column with the shape
+    :return: the shapes
+    """
+
     return [shape for shape in file[file[name_column].isin(names)][geometry_column]]
 
 
 def vietnam_labels_coordinates():
+    """
+    Get coordinates of each entries of every labels, takes only the region in Vietnam where we have labels.
+    :return: the labels coordinates dictionary
+    """
+
     district_file = gpd.read_file(DISTRICTS_PATH)
     vietnam_shape = shapely.ops.unary_union([shape for shape in district_file['geometry']])
     selected_region = shapely.geometry.box(106.9998606274592134, 10.9999604855719539, 109.0000494390797456, 15.5002505644255208)
@@ -53,18 +67,33 @@ def vietnam_labels_coordinates():
 
 
 def highland_labels_coordinates():
+    """
+    Get coordinates of each entries of every labels, takes only the highland region in Vietnam.
+    :return: the labels coordinates dictionary
+    """
+
     district_file = gpd.read_file(DISTRICTS_PATH)
     highland_districts_shape = shapely.ops.unary_union(shapes_from_geojson(district_file, HIGHLAND_DISTRICTS))
     return labels_coordinates_from_files(SHAPEFILE_PATHS, highland_districts_shape)
 
 
 def southern_labels_coordinates():
+    """
+    Get coordinates of each entries of every labels, takes only the southern region in Vietnam.
+    :return: the labels coordinates dictionary
+    """
+
     district_file = gpd.read_file(DISTRICTS_PATH)
     southern_districts_shape = shapely.ops.unary_union(shapes_from_geojson(district_file, SOUTHERN_DISTRICTS))
     return labels_coordinates_from_files(SHAPEFILE_PATHS, southern_districts_shape)
 
 
 def soils_labels_coordinates():
+    """
+    Get coordinates of each entries of every labels, create one labels dictionary by soil type.
+    :return: array of labels coordinates dictionaries
+    """
+
     soil_file = gpd.read_file(SOILMAP_PATH)
 
     soils = [
@@ -77,6 +106,11 @@ def soils_labels_coordinates():
 
 
 def districts_labels_coordinates():
+    """
+    Get coordinates of each entries of every labels, create one labels dictionary by districts.
+    :return: array of labels coordinates dictionaries
+    """
+
     district_file = gpd.read_file(DISTRICTS_PATH)
 
     districts = [

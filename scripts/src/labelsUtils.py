@@ -40,6 +40,13 @@ class Label(Enum):
 
 
 def labels_coordinates_from_files(shapefiles_paths, boundaries):
+    """
+    Create a dictionary with coordinates of each entries for every labels
+    :param shapefiles_paths: the path to the labels shapes
+    :param boundaries: the boundaries outside which entries are excluded
+    :return: the labels coordinates dictionary
+    """
+
     # Create a dictionary which will contain all
     # points classified in the opened shapefiles
     # with their coordinates lat-lon

@@ -12,10 +12,16 @@ FOLDER_NAMES = [
 
 
 def open_raster_files(folder_path):
+    """
+    Open rasters inside a folder
+    :param folder_path: the folder path
+    :return: files opened by rasterio
+    """
     raster_paths = glob.glob(ROOT_PATH + folder_path + "*.tif")
     return list(map(rasterio.open, raster_paths))
 
 
+# For each folder in FOLDER_NAMES, merge all rasters to a file named 'merged.tif'
 for folder_name in FOLDER_NAMES:
     folder_path = './' + folder_name + '/'
 
@@ -36,7 +42,7 @@ for folder_name in FOLDER_NAMES:
     print("Writing merged raster to disk...")
 
     # Write merged raster to disk
-    with rasterio.open(ROOT_PATH + folder_path + 'merged2.tif', "w", **metadata) as dest:
+    with rasterio.open(ROOT_PATH + folder_path + 'merged.tif', "w", **metadata) as dest:
         dest.write(merged_result)
 
     print("Finished writing to disk")

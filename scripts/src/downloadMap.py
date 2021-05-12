@@ -1,6 +1,5 @@
 import ee
 import time
-from datetime import datetime
 
 # Initialize Google Earth Engine library
 ee.Initialize()
@@ -19,6 +18,12 @@ COUNTRY_NAME = 'Vietnam'
 
 
 def country_geometry(country_name):
+    """
+    Get a country geometry
+    :param country_name: the country name
+    :return: the country geometry
+    """
+
     world_countries = ee.FeatureCollection('USDOS/LSIB_SIMPLE/2017')
     filter_country = ee.Filter.eq('country_na', country_name)
     country = world_countries.filter(filter_country)
@@ -27,6 +32,13 @@ def country_geometry(country_name):
 
 
 def mask_clouds(image):
+    """
+    mask clouds in a landsat 8 image.
+    See: https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_SR?hl=in&skip_cache=false
+    :param image: the image
+    :return: image without clouds
+    """
+
     # Bits 3 and 5 are cloud shadow and cloud, respectively.
     cloud_shadow_bit_mask = (1 << 3)
     clouds_bit_mask = (1 << 5)
@@ -41,6 +53,11 @@ def mask_clouds(image):
 
 
 def start_task(task):
+    """
+    Start a google earth engine task while keeping tracks of its state
+    :param task: the task
+    """
+
     task.start()
     print("Download task started...")
 
@@ -59,11 +76,17 @@ def start_task(task):
         time.sleep(30)
 
 
-# start date (inclusive)
-# Min start date is '2013-04-11'
-# end date (exclusive)
-# Max end date is '2021-01-22'
 def create_image_collection(start_date, end_date):
+    """
+    Create an image collection containing satellite image in REGION_RECTANGLE and within the time range.
+    Warning: the end_date is excluded
+    Min start date is '2013-04-11'
+    Max end date is '2021-01-22'
+    :param start_date: the start date
+    :param end_date: the end date
+    :return: the image collection
+    """
+
     # Select Landsat 8 dataset
     return ee.ImageCollection(SATELLITE_DATASET) \
         .filterDate(start_date, end_date) \
@@ -72,7 +95,13 @@ def create_image_collection(start_date, end_date):
 
 
 def create_export_task(img, folder_name):
-    # Create an export to drive task
+    """
+    Create an export to drive task in Google Earth Engine
+    :param img: the image to export
+    :param folder_name: folder name in drive to export to
+    :return: the task
+    """
+
     return ee.batch.Export.image.toDrive(img, 'Vietnam', **{
         'folder': folder_name,
         'scale': 30,
@@ -83,6 +112,12 @@ def create_export_task(img, folder_name):
 
 
 def image_collection_to_median_img(image_collection):
+    """
+    Reduce an image collection to a median image and
+    keep only parts of the image within REGION_RECTANGLE and the country shape
+    :param image_collection:
+    :return: the median image
+    """
     country_region = country_geometry(COUNTRY_NAME)
 
     # Reduce collection by median
