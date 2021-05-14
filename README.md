@@ -8,4 +8,13 @@ En collaboration avec le centre de recherche sur l'Agriculture Tropicale (CIAT)
 Plus concrètement, il s'agit de:
   - Exploiter des images satellite (Landsat 8) historiques (p.ex. à partir de 2013) pour détecter la deforestation au Vietnam, en utilisant les techniques du Machine Learning 
   - Comparer les résultats avec des cartes existantes et utiliser d'autres sources de données pour affiner la détection de la déforestation   
-  - Utiliser et adapter des modèles Machine Learning de détection des champs de café et autres "commodities" pour évaluer si ces champs sont le produit d'une déforestation après 2013 ou non. 
+  - Utiliser et adapter des modèles Machine Learning de détection des champs de café et autres "commodities" pour évaluer si ces champs sont le produit d'une déforestation après 2013 ou non.
+
+## Installer les dépendances
+Il est possible d'installer les dépendances requises grâce au fichier requirements.txt.
+
+Il suffira de faire :
+
+```
+pip install -r requirements.txt
+```
