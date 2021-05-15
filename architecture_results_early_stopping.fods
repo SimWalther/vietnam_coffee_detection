@@ -1,0 +1,747 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<office:document xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" xmlns:css3t="http://www.w3.org/TR/css3-text/" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rpt="http://openoffice.org/2005/report" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:xforms="http://www.w3.org/2002/xforms" office:version="1.3" office:mimetype="application/vnd.oasis.opendocument.spreadsheet">
+ <office:meta><meta:creation-date>2021-05-15T08:24:46.072851392</meta:creation-date><dc:date>2021-05-15T13:19:57.820582702</dc:date><meta:editing-duration>PT4H34M40S</meta:editing-duration><meta:editing-cycles>3</meta:editing-cycles><meta:generator>LibreOffice/7.1.2.2$Linux_X86_64 LibreOffice_project/10$Build-2</meta:generator><meta:document-statistic meta:table-count="1" meta:cell-count="90" meta:object-count="0"/></office:meta>
+ <office:settings>
+  <config:config-item-set config:name="ooo:view-settings">
+   <config:config-item config:name="VisibleAreaTop" config:type="int">0</config:config-item>
+   <config:config-item config:name="VisibleAreaLeft" config:type="int">0</config:config-item>
+   <config:config-item config:name="VisibleAreaWidth" config:type="int">25594</config:config-item>
+   <config:config-item config:name="VisibleAreaHeight" config:type="int">12636</config:config-item>
+   <config:config-item-map-indexed config:name="Views">
+    <config:config-item-map-entry>
+     <config:config-item config:name="ViewId" config:type="string">view1</config:config-item>
+     <config:config-item-map-named config:name="Tables">
+      <config:config-item-map-entry config:name="Sheet1">
+       <config:config-item config:name="CursorPositionX" config:type="int">2</config:config-item>
+       <config:config-item config:name="CursorPositionY" config:type="int">25</config:config-item>
+       <config:config-item config:name="HorizontalSplitMode" config:type="short">0</config:config-item>
+       <config:config-item config:name="VerticalSplitMode" config:type="short">0</config:config-item>
+       <config:config-item config:name="HorizontalSplitPosition" config:type="int">0</config:config-item>
+       <config:config-item config:name="VerticalSplitPosition" config:type="int">0</config:config-item>
+       <config:config-item config:name="ActiveSplitRange" config:type="short">2</config:config-item>
+       <config:config-item config:name="PositionLeft" config:type="int">0</config:config-item>
+       <config:config-item config:name="PositionRight" config:type="int">0</config:config-item>
+       <config:config-item config:name="PositionTop" config:type="int">0</config:config-item>
+       <config:config-item config:name="PositionBottom" config:type="int">0</config:config-item>
+       <config:config-item config:name="ZoomType" config:type="short">0</config:config-item>
+       <config:config-item config:name="ZoomValue" config:type="int">85</config:config-item>
+       <config:config-item config:name="PageViewZoomValue" config:type="int">60</config:config-item>
+       <config:config-item config:name="ShowGrid" config:type="boolean">true</config:config-item>
+       <config:config-item config:name="AnchoredTextOverflowLegacy" config:type="boolean">false</config:config-item>
+      </config:config-item-map-entry>
+     </config:config-item-map-named>
+     <config:config-item config:name="ActiveTable" config:type="string">Sheet1</config:config-item>
+     <config:config-item config:name="HorizontalScrollbarWidth" config:type="int">1848</config:config-item>
+     <config:config-item config:name="ZoomType" config:type="short">0</config:config-item>
+     <config:config-item config:name="ZoomValue" config:type="int">85</config:config-item>
+     <config:config-item config:name="PageViewZoomValue" config:type="int">60</config:config-item>
+     <config:config-item config:name="ShowPageBreakPreview" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="ShowZeroValues" config:type="boolean">true</config:config-item>
+     <config:config-item config:name="ShowNotes" config:type="boolean">true</config:config-item>
+     <config:config-item config:name="ShowGrid" config:type="boolean">true</config:config-item>
+     <config:config-item config:name="GridColor" config:type="int">12632256</config:config-item>
+     <config:config-item config:name="ShowPageBreaks" config:type="boolean">true</config:config-item>
+     <config:config-item config:name="HasColumnRowHeaders" config:type="boolean">true</config:config-item>
+     <config:config-item config:name="HasSheetTabs" config:type="boolean">true</config:config-item>
+     <config:config-item config:name="IsOutlineSymbolsSet" config:type="boolean">true</config:config-item>
+     <config:config-item config:name="IsValueHighlightingEnabled" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="IsSnapToRaster" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="RasterIsVisible" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="RasterResolutionX" config:type="int">1000</config:config-item>
+     <config:config-item config:name="RasterResolutionY" config:type="int">1000</config:config-item>
+     <config:config-item config:name="RasterSubdivisionX" config:type="int">1</config:config-item>
+     <config:config-item config:name="RasterSubdivisionY" config:type="int">1</config:config-item>
+     <config:config-item config:name="IsRasterAxisSynchronized" config:type="boolean">true</config:config-item>
+     <config:config-item config:name="AnchoredTextOverflowLegacy" config:type="boolean">false</config:config-item>
+    </config:config-item-map-entry>
+   </config:config-item-map-indexed>
+  </config:config-item-set>
+  <config:config-item-set config:name="ooo:configuration-settings">
+   <config:config-item config:name="EmbedComplexScriptFonts" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="EmbedAsianScriptFonts" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="EmbedLatinScriptFonts" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="EmbedOnlyUsedFonts" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="RasterResolutionY" config:type="int">1000</config:config-item>
+   <config:config-item config:name="IsOutlineSymbolsSet" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="RasterSubdivisionY" config:type="int">1</config:config-item>
+   <config:config-item config:name="GridColor" config:type="int">12632256</config:config-item>
+   <config:config-item config:name="HasColumnRowHeaders" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="ShowNotes" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="HasSheetTabs" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrinterSetup" config:type="base64Binary"/>
+   <config:config-item config:name="RasterResolutionX" config:type="int">1000</config:config-item>
+   <config:config-item config:name="RasterIsVisible" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ShowZeroValues" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="ApplyUserData" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="RasterSubdivisionX" config:type="int">1</config:config-item>
+   <config:config-item config:name="IsRasterAxisSynchronized" config:type="boolean">true</config:config-item>
+   <config:config-item-map-indexed config:name="ForbiddenCharacters">
+    <config:config-item-map-entry>
+     <config:config-item config:name="Language" config:type="string">fr</config:config-item>
+     <config:config-item config:name="Country" config:type="string">CH</config:config-item>
+     <config:config-item config:name="Variant" config:type="string"/>
+     <config:config-item config:name="BeginLine" config:type="string"/>
+     <config:config-item config:name="EndLine" config:type="string"/>
+    </config:config-item-map-entry>
+   </config:config-item-map-indexed>
+   <config:config-item config:name="LoadReadonly" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="AutoCalculate" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="EmbedFonts" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="SaveThumbnail" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="ShowGrid" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrinterName" config:type="string"/>
+   <config:config-item config:name="PrinterPaperFromSetup" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="CharacterCompressionType" config:type="short">0</config:config-item>
+   <config:config-item config:name="LinkUpdateMode" config:type="short">3</config:config-item>
+   <config:config-item config:name="ShowPageBreaks" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="SaveVersionOnClose" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="IsSnapToRaster" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="IsKernAsianPunctuation" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="UpdateFromTemplate" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="IsDocumentShared" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="AllowPrintJobCancel" config:type="boolean">true</config:config-item>
+   <config:config-item-map-named config:name="ScriptConfiguration">
+    <config:config-item-map-entry config:name="Sheet1">
+     <config:config-item config:name="CodeName" config:type="string">Sheet1</config:config-item>
+    </config:config-item-map-entry>
+   </config:config-item-map-named>
+  </config:config-item-set>
+ </office:settings>
+ <office:scripts>
+  <office:script script:language="ooo:Basic">
+   <ooo:libraries xmlns:ooo="http://openoffice.org/2004/office" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <ooo:library-embedded ooo:name="Standard"/>
+   </ooo:libraries>
+  </office:script>
+ </office:scripts>
+ <office:font-face-decls>
+  <style:font-face style:name="Liberation Sans" svg:font-family="&apos;Liberation Sans&apos;" style:font-family-generic="swiss" style:font-pitch="variable"/>
+  <style:font-face style:name="Noto Sans CJK SC" svg:font-family="&apos;Noto Sans CJK SC&apos;" style:font-family-generic="system" style:font-pitch="variable"/>
+  <style:font-face style:name="Noto Sans Devanagari" svg:font-family="&apos;Noto Sans Devanagari&apos;" style:font-family-generic="system" style:font-pitch="variable"/>
+ </office:font-face-decls>
+ <office:styles>
+  <style:default-style style:family="table-cell">
+   <style:paragraph-properties style:tab-stop-distance="1.25cm"/>
+   <style:text-properties style:font-name="Liberation Sans" fo:language="fr" fo:country="CH" style:font-name-asian="Noto Sans CJK SC" style:language-asian="zh" style:country-asian="CN" style:font-name-complex="Noto Sans Devanagari" style:language-complex="hi" style:country-complex="IN"/>
+  </style:default-style>
+  <number:number-style style:name="N0">
+   <number:number number:min-integer-digits="1"/>
+  </number:number-style>
+  <number:percentage-style style:name="N107">
+   <number:number number:decimal-places="3" number:min-decimal-places="3" number:min-integer-digits="1"/>
+   <number:text>%</number:text>
+  </number:percentage-style>
+  <number:number-style style:name="N108">
+   <number:number number:decimal-places="1" number:min-decimal-places="1" number:min-integer-digits="1" number:grouping="true"/>
+  </number:number-style>
+  <style:style style:name="Default" style:family="table-cell"/>
+  <style:style style:name="Heading" style:family="table-cell" style:parent-style-name="Default">
+   <style:text-properties fo:color="#000000" fo:font-size="24pt" fo:font-style="normal" fo:font-weight="bold"/>
+  </style:style>
+  <style:style style:name="Heading_20_1" style:display-name="Heading 1" style:family="table-cell" style:parent-style-name="Heading">
+   <style:text-properties fo:color="#000000" fo:font-size="18pt" fo:font-style="normal" fo:font-weight="normal"/>
+  </style:style>
+  <style:style style:name="Heading_20_2" style:display-name="Heading 2" style:family="table-cell" style:parent-style-name="Heading">
+   <style:text-properties fo:color="#000000" fo:font-size="12pt" fo:font-style="normal" fo:font-weight="normal"/>
+  </style:style>
+  <style:style style:name="Text" style:family="table-cell" style:parent-style-name="Default"/>
+  <style:style style:name="Note" style:family="table-cell" style:parent-style-name="Text">
+   <style:table-cell-properties fo:background-color="#ffffcc" style:diagonal-bl-tr="none" style:diagonal-tl-br="none" fo:border="0.74pt solid #808080"/>
+   <style:text-properties fo:color="#333333" fo:font-size="10pt" fo:font-style="normal" fo:font-weight="normal"/>
+  </style:style>
+  <style:style style:name="Footnote" style:family="table-cell" style:parent-style-name="Text">
+   <style:text-properties fo:color="#808080" fo:font-size="10pt" fo:font-style="italic" fo:font-weight="normal"/>
+  </style:style>
+  <style:style style:name="Hyperlink" style:family="table-cell" style:parent-style-name="Text">
+   <style:text-properties fo:color="#0000ee" fo:font-size="10pt" fo:font-style="normal" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="#0000ee" fo:font-weight="normal"/>
+  </style:style>
+  <style:style style:name="Status" style:family="table-cell" style:parent-style-name="Default"/>
+  <style:style style:name="Good" style:family="table-cell" style:parent-style-name="Status">
+   <style:table-cell-properties fo:background-color="#ccffcc"/>
+   <style:text-properties fo:color="#006600" fo:font-size="10pt" fo:font-style="normal" fo:font-weight="normal"/>
+  </style:style>
+  <style:style style:name="Neutral" style:family="table-cell" style:parent-style-name="Status">
+   <style:table-cell-properties fo:background-color="#ffffcc"/>
+   <style:text-properties fo:color="#996600" fo:font-size="10pt" fo:font-style="normal" fo:font-weight="normal"/>
+  </style:style>
+  <style:style style:name="Bad" style:family="table-cell" style:parent-style-name="Status">
+   <style:table-cell-properties fo:background-color="#ffcccc"/>
+   <style:text-properties fo:color="#cc0000" fo:font-size="10pt" fo:font-style="normal" fo:font-weight="normal"/>
+  </style:style>
+  <style:style style:name="Warning" style:family="table-cell" style:parent-style-name="Status">
+   <style:text-properties fo:color="#cc0000" fo:font-size="10pt" fo:font-style="normal" fo:font-weight="normal"/>
+  </style:style>
+  <style:style style:name="Error" style:family="table-cell" style:parent-style-name="Status">
+   <style:table-cell-properties fo:background-color="#cc0000"/>
+   <style:text-properties fo:color="#ffffff" fo:font-size="10pt" fo:font-style="normal" fo:font-weight="bold"/>
+  </style:style>
+  <style:style style:name="Accent" style:family="table-cell" style:parent-style-name="Default">
+   <style:text-properties fo:color="#000000" fo:font-size="10pt" fo:font-style="normal" fo:font-weight="bold"/>
+  </style:style>
+  <style:style style:name="Accent_20_1" style:display-name="Accent 1" style:family="table-cell" style:parent-style-name="Accent">
+   <style:table-cell-properties fo:background-color="#000000"/>
+   <style:text-properties fo:color="#ffffff" fo:font-size="10pt" fo:font-style="normal" fo:font-weight="normal"/>
+  </style:style>
+  <style:style style:name="Accent_20_2" style:display-name="Accent 2" style:family="table-cell" style:parent-style-name="Accent">
+   <style:table-cell-properties fo:background-color="#808080"/>
+   <style:text-properties fo:color="#ffffff" fo:font-size="10pt" fo:font-style="normal" fo:font-weight="normal"/>
+  </style:style>
+  <style:style style:name="Accent_20_3" style:display-name="Accent 3" style:family="table-cell" style:parent-style-name="Accent">
+   <style:table-cell-properties fo:background-color="#dddddd"/>
+  </style:style>
+  <style:style style:name="Result" style:family="table-cell" style:parent-style-name="Default">
+   <style:text-properties fo:color="#000000" fo:font-size="10pt" fo:font-style="italic" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="#000000" fo:font-weight="bold"/>
+  </style:style>
+ </office:styles>
+ <office:automatic-styles>
+  <style:style style:name="co1" style:family="table-column">
+   <style:table-column-properties fo:break-before="auto" style:column-width="13.681cm"/>
+  </style:style>
+  <style:style style:name="co2" style:family="table-column">
+   <style:table-column-properties fo:break-before="auto" style:column-width="2.498cm"/>
+  </style:style>
+  <style:style style:name="co3" style:family="table-column">
+   <style:table-column-properties fo:break-before="auto" style:column-width="2.529cm"/>
+  </style:style>
+  <style:style style:name="co4" style:family="table-column">
+   <style:table-column-properties fo:break-before="auto" style:column-width="2.081cm"/>
+  </style:style>
+  <style:style style:name="co5" style:family="table-column">
+   <style:table-column-properties fo:break-before="auto" style:column-width="2.371cm"/>
+  </style:style>
+  <style:style style:name="co6" style:family="table-column">
+   <style:table-column-properties fo:break-before="auto" style:column-width="2.434cm"/>
+  </style:style>
+  <style:style style:name="co7" style:family="table-column">
+   <style:table-column-properties fo:break-before="auto" style:column-width="2.258cm"/>
+  </style:style>
+  <style:style style:name="ro1" style:family="table-row">
+   <style:table-row-properties style:row-height="0.452cm" fo:break-before="auto" style:use-optimal-row-height="true"/>
+  </style:style>
+  <style:style style:name="ro2" style:family="table-row">
+   <style:table-row-properties style:row-height="0.841cm" fo:break-before="auto" style:use-optimal-row-height="true"/>
+  </style:style>
+  <style:style style:name="ro3" style:family="table-row">
+   <style:table-row-properties style:row-height="1.236cm" fo:break-before="auto" style:use-optimal-row-height="true"/>
+  </style:style>
+  <style:style style:name="ta1" style:family="table" style:master-page-name="Default">
+   <style:table-properties table:display="true" style:writing-mode="lr-tb"/>
+  </style:style>
+  <number:number-style style:name="N2">
+   <number:number number:decimal-places="2" number:min-decimal-places="2" number:min-integer-digits="1"/>
+  </number:number-style>
+  <number:number-style style:name="N3">
+   <number:number number:decimal-places="0" number:min-decimal-places="0" number:min-integer-digits="1" number:grouping="true"/>
+  </number:number-style>
+  <number:percentage-style style:name="N11">
+   <number:number number:decimal-places="2" number:min-decimal-places="2" number:min-integer-digits="1"/>
+   <number:text>%</number:text>
+  </number:percentage-style>
+  <style:style style:name="ce1" style:family="table-cell" style:parent-style-name="Default">
+   <style:table-cell-properties fo:wrap-option="wrap"/>
+  </style:style>
+  <style:style style:name="ce2" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N3">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:style style:name="ce3" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N3">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false" fo:wrap-option="wrap"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:style style:name="ce4" style:family="table-cell" style:parent-style-name="Default">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:style style:name="ce5" style:family="table-cell" style:parent-style-name="Default"/>
+  <style:style style:name="ce6" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N107">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:style style:name="ce7" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N11">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false" fo:wrap-option="wrap"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:style style:name="ce8" style:family="table-cell" style:parent-style-name="Default">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:style style:name="ce9" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N107">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:style style:name="ce10" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N11">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false" fo:wrap-option="wrap"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:style style:name="ce11" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N107">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:style style:name="ce12" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N11">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false" fo:wrap-option="wrap"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:style style:name="ce13" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N107">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:style style:name="ce14" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N11">
+   <style:table-cell-properties style:text-align-source="fix" style:repeat-content="false" fo:wrap-option="wrap"/>
+   <style:paragraph-properties fo:text-align="start" fo:margin-left="0cm"/>
+  </style:style>
+  <style:page-layout style:name="pm1">
+   <style:page-layout-properties style:writing-mode="lr-tb"/>
+   <style:header-style>
+    <style:header-footer-properties fo:min-height="0.75cm" fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-bottom="0.25cm"/>
+   </style:header-style>
+   <style:footer-style>
+    <style:header-footer-properties fo:min-height="0.75cm" fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-top="0.25cm"/>
+   </style:footer-style>
+  </style:page-layout>
+  <style:page-layout style:name="pm2">
+   <style:page-layout-properties style:writing-mode="lr-tb"/>
+   <style:header-style>
+    <style:header-footer-properties fo:min-height="0.75cm" fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-bottom="0.25cm" fo:border="2.49pt solid #000000" fo:padding="0.018cm" fo:background-color="#c0c0c0">
+     <style:background-image/>
+    </style:header-footer-properties>
+   </style:header-style>
+   <style:footer-style>
+    <style:header-footer-properties fo:min-height="0.75cm" fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-top="0.25cm" fo:border="2.49pt solid #000000" fo:padding="0.018cm" fo:background-color="#c0c0c0">
+     <style:background-image/>
+    </style:header-footer-properties>
+   </style:footer-style>
+  </style:page-layout>
+ </office:automatic-styles>
+ <office:master-styles>
+  <style:master-page style:name="Default" style:page-layout-name="pm1">
+   <style:header>
+    <text:p><text:sheet-name>???</text:sheet-name></text:p>
+   </style:header>
+   <style:header-left style:display="false"/>
+   <style:footer>
+    <text:p>Page <text:page-number>1</text:page-number></text:p>
+   </style:footer>
+   <style:footer-left style:display="false"/>
+  </style:master-page>
+  <style:master-page style:name="Report" style:page-layout-name="pm2">
+   <style:header>
+    <style:region-left>
+     <text:p><text:sheet-name>???</text:sheet-name><text:s/>(<text:title>???</text:title>)</text:p>
+    </style:region-left>
+    <style:region-right>
+     <text:p><text:date style:data-style-name="N2" text:date-value="2021-05-15">00.00.0000</text:date>, <text:time>00:00:00</text:time></text:p>
+    </style:region-right>
+   </style:header>
+   <style:header-left style:display="false"/>
+   <style:footer>
+    <text:p>Page <text:page-number>1</text:page-number><text:s/>/ <text:page-count>99</text:page-count></text:p>
+   </style:footer>
+   <style:footer-left style:display="false"/>
+  </style:master-page>
+ </office:master-styles>
+ <office:body>
+  <office:spreadsheet>
+   <table:calculation-settings table:automatic-find-labels="false" table:use-regular-expressions="false" table:use-wildcards="true"/>
+   <table:table table:name="Sheet1" table:style-name="ta1">
+    <table:table-column table:style-name="co1" table:default-cell-style-name="Default"/>
+    <table:table-column table:style-name="co2" table:default-cell-style-name="ce4"/>
+    <table:table-column table:style-name="co3" table:default-cell-style-name="ce8"/>
+    <table:table-column table:style-name="co4" table:default-cell-style-name="ce8"/>
+    <table:table-column table:style-name="co5" table:default-cell-style-name="ce8"/>
+    <table:table-column table:style-name="co6" table:default-cell-style-name="ce8"/>
+    <table:table-column table:style-name="co7" table:number-columns-repeated="1018" table:default-cell-style-name="Default"/>
+    <table:table-row table:style-name="ro1">
+     <table:table-cell office:value-type="string" calcext:value-type="string">
+      <text:p>architecture</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="Default" office:value-type="string" calcext:value-type="string">
+      <text:p>nb parameters</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="Default" office:value-type="string" calcext:value-type="string">
+      <text:p>mean precision</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="Default" office:value-type="string" calcext:value-type="string">
+      <text:p>mean recall</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="Default" office:value-type="string" calcext:value-type="string">
+      <text:p>mean f-score</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="Default" office:value-type="string" calcext:value-type="string">
+      <text:p>coffee f-score</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro2">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>2x32 conv k=(3, 3), MaxPooling2D k=(3, 3), 2x64 conv k=(3, 3), MaxPooling2D k=(3, 3), 0.5 SpatialDropout, GlobalAveragePooling, 1x128 FC with 0.25 dropout</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="74966" calcext:value-type="float">
+      <text:p>74&apos;966</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.707847714222911" calcext:value-type="percentage">
+      <text:p>70.785%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.771158742290215" calcext:value-type="percentage">
+      <text:p>77.116%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.731909721789817" calcext:value-type="percentage">
+      <text:p>73.191%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.78644712" calcext:value-type="percentage">
+      <text:p>78.645%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro2">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>2x32 conv k=(3, 3), MaxPooling2D k=(3, 3), 2x64 conv k=(2, 2), MaxPooling2D k=(3, 3), 0.5 SpatialDropout, GlobalAveragePooling, 1x128 FC with 0.25 dropout</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="44246" calcext:value-type="float">
+      <text:p>44&apos;246</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.699784532902142" calcext:value-type="percentage">
+      <text:p>69.978%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.772678232937752" calcext:value-type="percentage">
+      <text:p>77.268%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.726851700780007" calcext:value-type="percentage">
+      <text:p>72.685%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.77537446" calcext:value-type="percentage">
+      <text:p>77.537%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro2">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>2x32 conv, 1x32 s=(3, 3), 2x64 conv, 1x64 s=(3, 3), 0.25 SpatialDropout, GlobalAveragePooling, 1x128 FC with 0.25 dropout</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="121142" calcext:value-type="float">
+      <text:p>121&apos;142</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.704040120787367" calcext:value-type="percentage">
+      <text:p>70.404%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.755144928766844" calcext:value-type="percentage">
+      <text:p>75.514%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.725753821386942" calcext:value-type="percentage">
+      <text:p>72.575%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.78112081" calcext:value-type="percentage">
+      <text:p>78.112%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro2">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>3x32 conv k=(3, 3), MaxPooling2D k=(3, 3), 3x64 conv k=(3, 3), MaxPooling2D k=(3, 3), 0.5 SpatialDropout, GlobalAveragePooling, 1x128 FC with 0.25 dropout</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce3" office:value-type="float" office:value="121142" calcext:value-type="float">
+      <text:p>121&apos;142</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce7" office:value-type="percentage" office:value="0.7002357066814" calcext:value-type="percentage">
+      <text:p>70.02%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce10" office:value-type="percentage" office:value="0.755785730020141" calcext:value-type="percentage">
+      <text:p>75.58%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce12" office:value-type="percentage" office:value="0.721549396948302" calcext:value-type="percentage">
+      <text:p>72.15%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce14" office:value-type="percentage" office:value="0.77974074" calcext:value-type="percentage">
+      <text:p>77.97%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro2">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>2x32 conv k=(2, 2), MaxPooling2D k=(3, 3), 2x64 conv k=(2, 2), MaxPooling2D k=(3, 3), 0.5 SpatialDropout, GlobalAveragePooling, 1x128 FC with 0.25 dropout</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="38486" calcext:value-type="float">
+      <text:p>38&apos;486</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.692562581400493" calcext:value-type="percentage">
+      <text:p>69.256%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.77670337618151" calcext:value-type="percentage">
+      <text:p>77.670%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.719845013292801" calcext:value-type="percentage">
+      <text:p>71.985%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.76738133" calcext:value-type="percentage">
+      <text:p>76.738%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro2">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>1x16 conv, 1x32 conv, 1x64 conv s=(2, 2), 1x64 conv, 0.25 SpatialDropout, MaxPooling2D k=(2, 2) s=(1, 1), GlobalAveragePooling</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="27462" calcext:value-type="float">
+      <text:p>27&apos;462</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.69097759494668" calcext:value-type="percentage">
+      <text:p>69.098%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.769923255744095" calcext:value-type="percentage">
+      <text:p>76.992%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.718971366071913" calcext:value-type="percentage">
+      <text:p>71.897%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.75656195" calcext:value-type="percentage">
+      <text:p>75.656%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro3">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>1x16 conv k=(3, 3), 1x32 conv k=(3, 3), MaxPooling2D k=(3, 3), 2x64 conv k=(2, 2), MaxPooling2D k=(3, 3), 0.25 SpatialDropout, GlobalAveragePooling, 1x32, 1x32 FC with 0.25 dropout</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="33286" calcext:value-type="float">
+      <text:p>33&apos;286</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.68912017855393" calcext:value-type="percentage">
+      <text:p>68.912%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.770439875164684" calcext:value-type="percentage">
+      <text:p>77.044%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.717058732315151" calcext:value-type="percentage">
+      <text:p>71.706%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.76702425" calcext:value-type="percentage">
+      <text:p>76.702%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro2">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>1x16 conv, 1x32 conv, 1x64 conv s=(2, 2), 1x64 conv, 0.25 SpatialDropout, MaxPooling2D k=(2, 2) s=(1, 1), GlobalAveragePooling, 1x128 FC</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="36166" calcext:value-type="float">
+      <text:p>36&apos;166</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.68643835519192" calcext:value-type="percentage">
+      <text:p>68.644%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.771861985549854" calcext:value-type="percentage">
+      <text:p>77.186%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.714923921422762" calcext:value-type="percentage">
+      <text:p>71.492%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.75151411" calcext:value-type="percentage">
+      <text:p>75.151%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro1">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>2x32 conv, 2x64 conv, MaxPooling2D k=(2, 2), GlobalAveragePooling</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="29782" calcext:value-type="float">
+      <text:p>29&apos;782</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.688853012796356" calcext:value-type="percentage">
+      <text:p>68.885%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.768065785295356" calcext:value-type="percentage">
+      <text:p>76.807%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.71425336731663" calcext:value-type="percentage">
+      <text:p>71.425%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.76299009" calcext:value-type="percentage">
+      <text:p>76.299%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro1">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>1x16 conv, 0.25 SpatialDropout, 3x16 conv, 1x256 FC with 0.5 dropout</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="336982" calcext:value-type="float">
+      <text:p>336&apos;982</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.684021244171977" calcext:value-type="percentage">
+      <text:p>68.402%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.761550770957383" calcext:value-type="percentage">
+      <text:p>76.155%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.713209253541332" calcext:value-type="percentage">
+      <text:p>71.321%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.75173572" calcext:value-type="percentage">
+      <text:p>75.174%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro2">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>1x16 conv, 1x32 conv, 1x64 conv s=(2, 2), 1x64 conv, 0.25 SpatialDropout, MaxPooling2D k=(2, 2) s=(1, 1), GlobalAveragePooling, 1x32 FC</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="29350" calcext:value-type="float">
+      <text:p>29&apos;350</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.679950288171611" calcext:value-type="percentage">
+      <text:p>67.995%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.773938041411156" calcext:value-type="percentage">
+      <text:p>77.394%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.710510320962614" calcext:value-type="percentage">
+      <text:p>71.051%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.74180513" calcext:value-type="percentage">
+      <text:p>74.181%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro3">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>1x16 conv k=(3, 3), 1x32 conv k=(2, 2), 1x64 conv k=(2, 2), 1x64 conv k=(1, 1), 0.25 SpatialDropout, MaxPooling2D k=(2, 2) s=(1, 1), GlobalAveragePooling, 1x32 FC - without padding</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="17382" calcext:value-type="float">
+      <text:p>17&apos;382</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.672775890781352" calcext:value-type="percentage">
+      <text:p>67.278%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.761338906839029" calcext:value-type="percentage">
+      <text:p>76.134%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.701887334649591" calcext:value-type="percentage">
+      <text:p>70.189%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.7499491" calcext:value-type="percentage">
+      <text:p>74.995%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro3">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>1x16 conv k=(3, 3), 1x32 conv k=(3, 3), 1x64 conv k=(2, 2), 1x64 conv k=(1, 1), 0.25 SpatialDropout, MaxPooling2D k=(2, 2), GlobalAveragePooling, 1x32 FC with 0.25 dropout</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="19942" calcext:value-type="float">
+      <text:p>19&apos;942</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.662444521734951" calcext:value-type="percentage">
+      <text:p>66.244%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.76397464055351" calcext:value-type="percentage">
+      <text:p>76.397%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.694131346838253" calcext:value-type="percentage">
+      <text:p>69.413%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.7241278" calcext:value-type="percentage">
+      <text:p>72.413%</text:p>
+     </table:table-cell>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro2">
+     <table:table-cell table:style-name="ce1" office:value-type="string" calcext:value-type="string">
+      <text:p>1x8 conv, 0.25 SpatialDropout, 1x16 conv, 1x32 conv, 1x64 conv s=(2, 2), 1x64 conv, 1x128 conv, GlobalAveragePooling</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce2" office:value-type="float" office:value="61134" calcext:value-type="float">
+      <text:p>61&apos;134</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce6" office:value-type="percentage" office:value="0.666301501237056" calcext:value-type="percentage">
+      <text:p>66.630%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce9" office:value-type="percentage" office:value="0.718950888260877" calcext:value-type="percentage">
+      <text:p>71.895%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce11" office:value-type="percentage" office:value="0.686119581127996" calcext:value-type="percentage">
+      <text:p>68.612%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce13" office:value-type="percentage" office:value="0.7414646" calcext:value-type="percentage">
+      <text:p>74.146%</text:p>
+     </table:table-cell>
+     <table:table-cell table:style-name="ce1" table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro1" table:number-rows-repeated="26">
+     <table:table-cell table:number-columns-repeated="1024"/>
+    </table:table-row>
+    <table:table-row table:style-name="ro1">
+     <table:table-cell/>
+     <table:table-cell table:style-name="ce5"/>
+     <table:table-cell table:style-name="Default" table:number-columns-repeated="4"/>
+     <table:table-cell table:number-columns-repeated="1018"/>
+    </table:table-row>
+    <calcext:conditional-formats>
+     <calcext:conditional-format calcext:target-range-address="Sheet1.B2:Sheet1.B42">
+      <calcext:color-scale>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="minimum" calcext:color="#00a933"/>
+       <calcext:color-scale-entry calcext:value="50" calcext:type="percentile" calcext:color="#ffff00"/>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="maximum" calcext:color="#ff0000"/>
+      </calcext:color-scale>
+     </calcext:conditional-format>
+     <calcext:conditional-format calcext:target-range-address="Sheet1.D2:Sheet1.D14">
+      <calcext:color-scale>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="minimum" calcext:color="#ff0000"/>
+       <calcext:color-scale-entry calcext:value="50" calcext:type="percentile" calcext:color="#ffff00"/>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="maximum" calcext:color="#00a933"/>
+      </calcext:color-scale>
+     </calcext:conditional-format>
+     <calcext:conditional-format calcext:target-range-address="Sheet1.E2:Sheet1.E14">
+      <calcext:color-scale>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="minimum" calcext:color="#ff0000"/>
+       <calcext:color-scale-entry calcext:value="50" calcext:type="percentile" calcext:color="#ffff00"/>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="maximum" calcext:color="#00a933"/>
+      </calcext:color-scale>
+     </calcext:conditional-format>
+     <calcext:conditional-format calcext:target-range-address="Sheet1.F2:Sheet1.F14">
+      <calcext:color-scale>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="minimum" calcext:color="#ff0000"/>
+       <calcext:color-scale-entry calcext:value="50" calcext:type="percentile" calcext:color="#ffff00"/>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="maximum" calcext:color="#00a933"/>
+      </calcext:color-scale>
+     </calcext:conditional-format>
+     <calcext:conditional-format calcext:target-range-address="Sheet1.C2:Sheet1.C15">
+      <calcext:color-scale>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="minimum" calcext:color="#ff0000"/>
+       <calcext:color-scale-entry calcext:value="50" calcext:type="percentile" calcext:color="#ffff00"/>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="maximum" calcext:color="#00a933"/>
+      </calcext:color-scale>
+     </calcext:conditional-format>
+     <calcext:conditional-format calcext:target-range-address="Sheet1.D2:Sheet1.D15">
+      <calcext:color-scale>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="minimum" calcext:color="#ff0000"/>
+       <calcext:color-scale-entry calcext:value="50" calcext:type="percentile" calcext:color="#ffff00"/>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="maximum" calcext:color="#00a933"/>
+      </calcext:color-scale>
+     </calcext:conditional-format>
+     <calcext:conditional-format calcext:target-range-address="Sheet1.E2:Sheet1.E15">
+      <calcext:color-scale>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="minimum" calcext:color="#ff0000"/>
+       <calcext:color-scale-entry calcext:value="50" calcext:type="percentile" calcext:color="#ffff00"/>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="maximum" calcext:color="#00a933"/>
+      </calcext:color-scale>
+     </calcext:conditional-format>
+     <calcext:conditional-format calcext:target-range-address="Sheet1.F2:Sheet1.F15">
+      <calcext:color-scale>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="minimum" calcext:color="#ff0000"/>
+       <calcext:color-scale-entry calcext:value="50" calcext:type="percentile" calcext:color="#ffff00"/>
+       <calcext:color-scale-entry calcext:value="0" calcext:type="maximum" calcext:color="#00a933"/>
+      </calcext:color-scale>
+     </calcext:conditional-format>
+    </calcext:conditional-formats>
+   </table:table>
+   <table:named-expressions/>
+   <table:database-ranges>
+    <table:database-range table:name="__Anonymous_Sheet_DB__0" table:target-range-address="Sheet1.A1:Sheet1.F15" table:display-filter-buttons="true">
+     <table:sort>
+      <table:sort-by table:field-number="4" table:order="descending" table:data-type="automatic"/>
+     </table:sort>
+    </table:database-range>
+   </table:database-ranges>
+  </office:spreadsheet>
+ </office:body>
+</office:document>
