@@ -3,15 +3,14 @@ from math import floor
 import matplotlib.pyplot as pl
 from sklearn.utils import class_weight
 from sklearn import metrics as me
-from keras.models import clone_model
+from keras.models import clone_model, load_model
 from keras.utils import to_categorical
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import EarlyStopping
-import pandas
-import geopandas as gpd
-import spacv
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 import keras
 import numpy as np
+
+MODEL_PATH = '../models/'
 
 
 class Metrics(keras.callbacks.Callback):
@@ -25,10 +24,11 @@ class Metrics(keras.callbacks.Callback):
         """
         Initialize callback
         :param train: the train set as a tuple (train set values, correct labels)
-        :param validation: the validation set as (test set values, correct labels)
+        :param validation: the validation set as (validation set values, correct labels)
         """
 
         super(Metrics, self).__init__()
+        self._supports_tf_logs = True
         self.train = train
         self.validation = validation
 
@@ -88,14 +88,14 @@ def k_fold_indices(dataset, k=5):
     return folds_indices
 
 
-def train_model(model, X_train, Y_train, X_test, Y_test, class_weights, epochs, steps_per_epoch, early_stopping=False):
+def train_model(model, X_train, Y_train, X_validation, Y_validation, class_weights, epochs, steps_per_epoch, early_stopping=False, model_checkpoint_cb=None):
     """
     Train a Keras neural network model
     :param model: the Keras neural network model
     :param X_train: the image train set
     :param Y_train: the correct labels of train set in one hot encoding
-    :param X_test: the image test set
-    :param Y_test: the correct labels of test set in one hot encoding
+    :param X_validation: the image validation set
+    :param Y_validation: the correct labels of validation set in one hot encoding
     :param class_weights: weight of each class. If classes are imbalanced it will gives more importance
     to underrepresented classes
     :param epochs: the number of epochs
@@ -120,10 +120,13 @@ def train_model(model, X_train, Y_train, X_test, Y_test, class_weights, epochs, 
     datagen.fit(X_train)
     train_datagen = datagen.flow(X_train, Y_train, batch_size=batch_size)
 
-    callbacks = [Metrics(train=(X_train, Y_train), validation=(X_test, Y_test))]
+    callbacks = [Metrics(train=(X_train, Y_train), validation=(X_validation, Y_validation))]
 
     if early_stopping:
         callbacks.append(EarlyStopping(monitor='f1_score_val', patience=150, mode="max"))
+
+    if model_checkpoint_cb:
+        callbacks.append(model_checkpoint_cb)
 
     # Define fit arguments
     fit_args = dict(
@@ -131,16 +134,24 @@ def train_model(model, X_train, Y_train, X_test, Y_test, class_weights, epochs, 
         epochs=epochs,
         class_weight=class_weights,
         steps_per_epoch=steps_per_epoch,
-        validation_data=(X_test, Y_test),
+        validation_data=(X_validation, Y_validation),
         callbacks=callbacks
     )
 
     return model.fit(**fit_args)
 
 
-def split_fold_into_train_test_sets(dataset, fold_start, fold_end, bands, labels_names):
+def separate_data_into_images_and_labels(data, bands, labels_names):
+    images = images_from_dataset(data, bands)
+    labels = labels_from_dataset(data, labels_names)
+    one_hot_labels = to_categorical(labels, num_classes=len(labels_names))
+
+    return images, labels, one_hot_labels
+
+
+def split_fold_into_train_validation_sets(dataset, fold_start, fold_end, bands, labels_names):
     """
-    Get train and test sets from a given fold
+    Get train and validation sets from a given fold
     :param dataset: the dataset
     :param fold_start: start position of the fold in the dataset
     :param fold_end: end position of the fold in the dataset
@@ -148,45 +159,55 @@ def split_fold_into_train_test_sets(dataset, fold_start, fold_end, bands, labels
     :param labels_names: the names of the labels to keep in the dataset
     :return:
     the image train set,
-    the correct labels of test set,
+    the correct labels of validation set,
     the correct labels of train set in one hot encoding,
-    the image test set,
-    the correct labels of test set,
-    the correct labels of test set in one hot encoding
+    the image validation set,
+    the correct labels of validation set,
+    the correct labels of validation set in one hot encoding
     """
-
-    nb_classes = len(labels_names)
 
     train = dataset[fold_start:fold_end]
-    test = dataset[:fold_start] + dataset[fold_end:]
+    validation = dataset[:fold_start] + dataset[fold_end:]
 
-    X_train = images_from_dataset(train, bands)
-    y_train = labels_from_dataset(train, labels_names)
-    Y_train = to_categorical(y_train, num_classes=nb_classes)
+    X_train, y_train, Y_train = separate_data_into_images_and_labels(train, bands, labels_names)
+    X_validation, y_validation, Y_validation = separate_data_into_images_and_labels(validation, bands, labels_names)
 
-    X_test = images_from_dataset(test, bands)
-    y_test = labels_from_dataset(test, labels_names)
-    Y_test = to_categorical(y_test, num_classes=nb_classes)
-
-    return X_train, y_train, Y_train, X_test, y_test, Y_test
+    return X_train, y_train, Y_train, X_validation, y_validation, Y_validation
 
 
-def train_and_evaluate_fold(X_test, X_train, Y_test, Y_train, y_test, y_train, epochs, fold, model, nb_labels, early_stopping=False, new_model=True):
+def evaluate_model(model, X_test, Y_test, y_test, nb_labels):
+    # Evaluate model
+    score = model.evaluate(X_test, Y_test, verbose=0)
+    loss = score[0]
+    accuracy = score[1]
+
+    # Predict labels on batch
+    pred = model.predict_on_batch(X_test)
+    pred = np.argmax(pred, axis=-1)
+
+    # Confusion matrix
+    conf_matrix = me.confusion_matrix(y_test, pred, labels=np.arange(nb_labels))
+
+    return conf_matrix, accuracy, loss
+
+
+def train_fold(X_validation, X_train, Y_validation, Y_train, y_validation, y_train, epochs, fold, validation, model, new_model=True, early_stopping=False, model_checkpoint_cb=None):
     """
-    Train a fold and gives back results
-    :param X_test: the image test set
+    Train a fold
+    :param X_validation: the image validation set
     :param X_train: the image train set
-    :param Y_test: the correct labels of test set in one hot encoding
+    :param Y_validation: the correct labels of validation set in one hot encoding
     :param Y_train: the correct labels of train set in one hot encoding
-    :param y_test: the correct labels of test set
-    :param y_train: the correct labels of test set
+    :param y_validation: the correct labels of validation set
+    :param y_train: the correct labels of validation set
     :param epochs: the number of epochs
     :param fold: the fold number
+    :param validation: the validation number
     :param model: the Keras neural network model
-    :param nb_labels: the number of labels
-    :param early_stopping: defines if there is early stopping
     :param new_model: defines if model should be reset or if the given model weights should be kept
-    :return: history, confusion matrix, accuracy and loss
+    :param early_stopping: defines if there is early stopping
+    :param model_checkpoint_cb: a model checkpoint callback
+    :return: history, trained model
     """
 
     fold_size = len(y_train)
@@ -209,38 +230,27 @@ def train_and_evaluate_fold(X_test, X_train, Y_test, Y_train, y_test, y_train, e
     else:
         current_model = model
 
-    print("\nFold ", (fold + 1), ":\n--------\n")
+    print("\nValidation ", (validation + 1), ", fold ", (fold + 1), ":\n---------------------------\n")
 
     # fit model
     history = train_model(
         current_model,
         X_train,
         Y_train,
-        X_test,
-        Y_test,
+        X_validation,
+        Y_validation,
         class_weights,
         epochs,
         fold_size / 32,
-        early_stopping
+        early_stopping,
+        model_checkpoint_cb,
     )
 
-    # Evaluate model
-    score = current_model.evaluate(X_test, Y_test, verbose=0)
-    loss = score[0]
-    accuracy = score[1]
-
-    # Add current confusion matrix to the global confusion matrix
-    pred = current_model.predict_on_batch(X_test)
-    pred = np.argmax(pred, axis=-1)
-
-    conf_matrix = me.confusion_matrix(y_test, pred, labels=np.arange(nb_labels))
-
-    return history, conf_matrix, accuracy, loss
+    return history, current_model
 
 
-def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations=1, k=5, early_stopping=False):
+def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations=1, k=5, early_stopping=False, with_model_checkpoint=False, model_name="model"):
     """
-    This is a function to do cross validation on a given keras model.
     :param model: the Keras neural network model
     :param dataset: the dataset, typically created with make_dataset_from_raster_files
     :param bands: an array of the position of the bands to use. ex: [3, 2, 1] will select bands Red, Green, Blue
@@ -250,8 +260,11 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
     :param nb_cross_validations: the number of time to repeat the cross validation.
     :param k: the number of folds
     :param early_stopping: defines if early stopping is used
+    :param model_name: name of the model, used to name the model file 
+    :param with_model_checkpoint: defines if model checkpoint should be used.
     :return: mean loss, mean accuracy, array of each history and the confusion matrix
     """
+
     labels_names = [label.name for label in labels]
     nb_labels = len(labels_names)
     histories = []
@@ -261,19 +274,38 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
 
     model.summary()
 
+    early_stopping_cb = None
+    model_checkpoint_cb = None
+
+    if with_model_checkpoint:
+        model_file = MODEL_PATH + model_name + ".hdf5"
+        model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True, mode='max')
+
     for validation in range(nb_cross_validations):
         np.random.shuffle(dataset)
 
         for fold, fold_indices in enumerate(k_fold_indices(dataset, k)):
-            X_train, y_train, Y_train, X_test, y_test, Y_test = split_fold_into_train_test_sets(
+            X_train, y_train, Y_train, X_validation, y_validation, Y_validation = split_fold_into_train_validation_sets(
                 dataset, fold_indices[0], fold_indices[1], bands, labels_names
             )
 
-            history, conf_matrix, accuracy, loss = train_and_evaluate_fold(
-                X_test, X_train, Y_test, Y_train, y_test, y_train,
-                epochs, fold, model, nb_labels,
-                early_stopping
+            history, trained_model = train_fold(
+                X_validation=X_validation,
+                X_train=X_train,
+                Y_validation=Y_validation,
+                Y_train=Y_train,
+                y_validation=y_validation,
+                y_train=y_train,
+                epochs=epochs,
+                fold=fold,
+                validation=validation,
+                model=model,
+                early_stopping=early_stopping,
+                model_checkpoint_cb=model_checkpoint_cb,
+                new_model=True,
             )
+
+            loss, accuracy, conf_matrix = evaluate_model(trained_model, X_validation, Y_validation, y_validation, nb_labels)
 
             fold_size = len(y_train)
 
@@ -321,7 +353,7 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epoch
         np.random.shuffle(dataset)
 
         for fold, fold_indices in enumerate(k_fold_indices(dataset, k)):
-            X_train, y_train, Y_train, X_test, y_test, Y_test = split_fold_into_train_test_sets(
+            X_train, y_train, Y_train, X_validation, y_validation, Y_validation = split_fold_into_train_validation_sets(
                 dataset, fold_indices[0], fold_indices[1], bands, labels_names
             )
 
@@ -332,10 +364,22 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epoch
             current_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
             for metric in range(nb_metrics):
-                history, conf_matrix, accuracy, loss = train_and_evaluate_fold(
-                    X_test, X_train, Y_test, Y_train, y_test, y_train,
-                    epochs_per_metrics, fold, current_model, nb_labels, early_stopping=False, new_model=False
+                history, current_model = train_fold(
+                    X_validation=X_validation,
+                    X_train=X_train,
+                    Y_validation=Y_validation,
+                    Y_train=Y_train,
+                    y_validation=y_validation,
+                    y_train=y_train,
+                    epochs=epochs,
+                    fold=fold,
+                    model=model,
+                    early_stopping=False,
+                    model_checkpoint_cb=None,
+                    new_model=False,
                 )
+
+                loss, accuracy, conf_matrix = evaluate_model(current_model, X_validation, Y_validation, y_validation, nb_labels)
 
                 fold_size = len(y_train)
 
@@ -345,68 +389,6 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epoch
                 mean_losses[metric] += loss * fold_size / (len(dataset) * nb_cross_validations)
 
     return mean_losses, mean_accuracies, histories, total_conf_matrices
-
-
-def spatial_cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations=1, early_stopping=False):
-    """
-    Spatial cross validation to train on a region and validate with another
-    :param model:  Keras neural network model
-    :param dataset: dataset, typically created with make_dataset_from_raster_files
-    :param bands: an array of the position of the bands to use. ex: [3, 2, 1] will select bands Red, Green, Blue
-    if the dataset contains images with all bands. Bands positions start at zero.
-    :param labels: an array of selected labels. Those labels should be entries of Label enum defined in labelsUtils.py
-    :param epochs: number of epochs
-    :param nb_cross_validations: number of time to repeat the cross validation
-    :param early_stopping: defines if early stopping is used
-    :return: mean loss, mean accuracy, array of each history and the confusion matrix
-    """
-
-    labels_names = [label.name for label in labels]
-
-    nb_labels = len(labels_names)
-    histories = []
-    mean_loss = 0
-    mean_accuracy = 0
-    total_conf_matrix = np.zeros((len(labels_names), len(labels_names)))
-
-    model.summary()
-
-    df = pandas.DataFrame(dataset,  columns=['labels_names', 'images', 'coords'])
-    labels_coordinates = gpd.GeoDataFrame(df, geometry='coords') # spacv requests a dataframe
-
-    for validation in range(nb_cross_validations):
-        fold = 0
-
-        skcv = spacv.SKCV(n_splits=5, buffer_radius=0.1).split(labels_coordinates)
-
-        for train, test in skcv:
-            train = [img for i, img in enumerate(dataset) if i in train]
-            test = [img for i, img in enumerate(dataset) if i in test]
-
-            X_train = images_from_dataset(train, bands)
-            y_train = labels_from_dataset(train, labels_names)
-            Y_train = to_categorical(y_train, num_classes=nb_labels)
-
-            X_test = images_from_dataset(test, bands)
-            y_test = labels_from_dataset(test, labels_names)
-            Y_test = to_categorical(y_test, num_classes=nb_labels)
-
-            history, conf_matrix, accuracy, loss = train_and_evaluate_fold(
-                X_test, X_train, Y_test, Y_train, y_test, y_train,
-                epochs, fold, model, nb_labels,
-                early_stopping
-            )
-
-            fold_size = len(y_train)
-
-            histories.append(history)
-            total_conf_matrix += conf_matrix
-            mean_accuracy += accuracy * fold_size / (len(dataset) * nb_cross_validations)
-            mean_loss += loss * fold_size / (len(dataset) * nb_cross_validations)
-
-            fold += 1
-
-    return mean_loss, mean_accuracy, histories, total_conf_matrix
 
 
 def images_from_dataset(dataset, bands):
@@ -483,3 +465,64 @@ def plot_confusion_matrix(confmatrix, labels_names, ax=None):
 #         dataset[i][1].append(mndwi.tolist())
 #
 #     return dataset
+#
+# def spatial_cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations=1, early_stopping=False):
+#     """
+#     Spatial cross validation to train on a region and validate with another
+#     :param model:  Keras neural network model
+#     :param dataset: dataset, typically created with make_dataset_from_raster_files
+#     :param bands: an array of the position of the bands to use. ex: [3, 2, 1] will select bands Red, Green, Blue
+#     if the dataset contains images with all bands. Bands positions start at zero.
+#     :param labels: an array of selected labels. Those labels should be entries of Label enum defined in labelsUtils.py
+#     :param epochs: number of epochs
+#     :param nb_cross_validations: number of time to repeat the cross validation
+#     :param early_stopping: defines if early stopping is used
+#     :return: mean loss, mean accuracy, array of each history and the confusion matrix
+#     """
+#
+#     labels_names = [label.name for label in labels]
+#
+#     nb_labels = len(labels_names)
+#     histories = []
+#     mean_loss = 0
+#     mean_accuracy = 0
+#     total_conf_matrix = np.zeros((len(labels_names), len(labels_names)))
+#
+#     model.summary()
+#
+#     df = pandas.DataFrame(dataset,  columns=['labels_names', 'images', 'coords'])
+#     labels_coordinates = gpd.GeoDataFrame(df, geometry='coords') # spacv requests a dataframe
+#
+#     for validation in range(nb_cross_validations):
+#         fold = 0
+#
+#         skcv = spacv.SKCV(n_splits=5, buffer_radius=0.1).split(labels_coordinates)
+#
+#         for train, validation in skcv:
+#             train = [img for i, img in enumerate(dataset) if i in train]
+#             validation = [img for i, img in enumerate(dataset) if i in validation]
+#
+#             X_train = images_from_dataset(train, bands)
+#             y_train = labels_from_dataset(train, labels_names)
+#             Y_train = to_categorical(y_train, num_classes=nb_labels)
+#
+#             X_validation = images_from_dataset(validation, bands)
+#             y_validation = labels_from_dataset(validation, labels_names)
+#             Y_validation = to_categorical(y_validation, num_classes=nb_labels)
+#
+#             history, conf_matrix, accuracy, loss = train_and_evaluate_fold(
+#                 X_validation, X_train, Y_validation, Y_train, y_validation, y_train,
+#                 epochs, fold, model, nb_labels,
+#                 early_stopping
+#             )
+#
+#             fold_size = len(y_train)
+#
+#             histories.append(history)
+#             total_conf_matrix += conf_matrix
+#             mean_accuracy += accuracy * fold_size / (len(dataset) * nb_cross_validations)
+#             mean_loss += loss * fold_size / (len(dataset) * nb_cross_validations)
+#
+#             fold += 1
+#
+#     return mean_loss, mean_accuracy, histories, total_conf_matrix
