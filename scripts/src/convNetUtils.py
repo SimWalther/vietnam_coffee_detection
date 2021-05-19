@@ -3,14 +3,48 @@ from math import floor
 import matplotlib.pyplot as pl
 from sklearn.utils import class_weight
 from sklearn import metrics as me
-from keras.models import clone_model, load_model
-from keras.utils import to_categorical
-from keras.preprocessing.image import ImageDataGenerator
+from keras.models import clone_model
+from keras.utils import to_categorical, Sequence
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 import keras
 import numpy as np
+from albumentations import (
+    Compose,
+    HorizontalFlip,
+    ShiftScaleRotate,
+)
 
 MODEL_PATH = '../models/'
+
+AUGMENTATIONS = Compose([
+    HorizontalFlip(p=0.5),
+    ShiftScaleRotate(
+        shift_limit=0.0625, scale_limit=0,
+        rotate_limit=15, p=0.8
+    ),
+])
+
+
+class LandsatSequence(Sequence):
+    """
+    Code taken from https://medium.com/the-artificial-impostor/custom-image-augmentation-with-keras-70595b01aeac
+    """
+
+    def __init__(self, x_set, y_set, batch_size, augmentations):
+        self.x, self.y = x_set, y_set
+        self.batch_size = batch_size
+        self.augment = augmentations
+
+    def __len__(self):
+        return int(np.ceil(len(self.x) / float(self.batch_size)))
+
+    def __getitem__(self, idx):
+        batch_x = self.x[idx * self.batch_size:(idx + 1) * self.batch_size]
+        batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
+
+        return np.stack([
+            self.augment(image=x)["image"] for x in batch_x
+        ], axis=0), np.array(batch_y)
 
 
 class Metrics(keras.callbacks.Callback):
@@ -116,14 +150,15 @@ def train_model(model, X_train, Y_train, X_validation, Y_validation, class_weigh
     batch_size = 32
 
     # create data generator
-    datagen = ImageDataGenerator(**data_gen_args)
-    datagen.fit(X_train)
-    train_datagen = datagen.flow(X_train, Y_train, batch_size=batch_size)
+    # datagen = ImageDataGenerator(**data_gen_args)
+    # datagen.fit(X_train)
+    # train_datagen = datagen.flow(X_train, Y_train, batch_size=batch_size)
+    train_datagen = LandsatSequence(X_train, Y_train, batch_size, AUGMENTATIONS)
 
     callbacks = [Metrics(train=(X_train, Y_train), validation=(X_validation, Y_validation))]
 
     if early_stopping:
-        callbacks.append(EarlyStopping(monitor='f1_score_val', patience=150, mode="max"))
+        callbacks.append(EarlyStopping(monitor='f1_score_val', patience=100, mode="max"))
 
     if model_checkpoint_cb:
         callbacks.append(model_checkpoint_cb)
@@ -274,10 +309,11 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
 
     model.summary()
 
-    early_stopping_cb = None
     model_checkpoint_cb = None
 
     if with_model_checkpoint:
+        # Model checkpoint callback should be created here to avoid resetting the 'best' property of the model checkpoint.
+        # By doing so, we ensure that model checkpoint is the best across all cross validations.
         model_file = MODEL_PATH + model_name + ".hdf5"
         model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True, mode='max')
 
@@ -305,7 +341,7 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
                 new_model=True,
             )
 
-            loss, accuracy, conf_matrix = evaluate_model(trained_model, X_validation, Y_validation, y_validation, nb_labels)
+            conf_matrix, accuracy, loss = evaluate_model(trained_model, X_validation, Y_validation, y_validation, nb_labels)
 
             fold_size = len(y_train)
 
@@ -379,7 +415,7 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epoch
                     new_model=False,
                 )
 
-                loss, accuracy, conf_matrix = evaluate_model(current_model, X_validation, Y_validation, y_validation, nb_labels)
+                conf_matrix, accuracy, loss = evaluate_model(current_model, X_validation, Y_validation, y_validation, nb_labels)
 
                 fold_size = len(y_train)
 
