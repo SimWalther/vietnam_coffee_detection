@@ -8,20 +8,29 @@ from keras.utils import to_categorical, Sequence
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 import keras
 import numpy as np
+import pandas
+import spacv
+
 from albumentations import (
     Compose,
     HorizontalFlip,
     ShiftScaleRotate,
+    VerticalFlip,
+    RandomRotate90,
 )
 
 MODEL_PATH = '../models/'
 
 AUGMENTATIONS = Compose([
     HorizontalFlip(p=0.5),
+    VerticalFlip(p=0.5),
     ShiftScaleRotate(
-        shift_limit=0.0625, scale_limit=0,
-        rotate_limit=15, p=0.8
+        shift_limit=0.0625,
+        scale_limit=0,
+        rotate_limit=0,
+        p=0.8
     ),
+    RandomRotate90(p=0.5),
 ])
 
 
@@ -122,7 +131,8 @@ def k_fold_indices(dataset, k=5):
     return folds_indices
 
 
-def train_model(model, X_train, Y_train, X_validation, Y_validation, class_weights, epochs, steps_per_epoch, early_stopping=False, model_checkpoint_cb=None):
+def train_model(model, X_train, Y_train, X_validation, Y_validation, class_weights, epochs, steps_per_epoch,
+                early_stopping=False, model_checkpoint_cb=None):
     """
     Train a Keras neural network model
     :param model: the Keras neural network model
@@ -137,16 +147,6 @@ def train_model(model, X_train, Y_train, X_validation, Y_validation, class_weigh
     :param early_stopping: defines if early stopping is used
     :return: the train history
     """
-
-    # Define data generator arguments
-    data_gen_args = dict(
-        rotation_range=45,
-        width_shift_range=0.1,
-        height_shift_range=0.1,
-        horizontal_flip=True,
-        fill_mode='nearest',
-    )
-
     batch_size = 32
 
     # create data generator
@@ -226,7 +226,8 @@ def evaluate_model(model, X_test, Y_test, y_test, nb_labels):
     return conf_matrix, accuracy, loss
 
 
-def train_fold(X_validation, X_train, Y_validation, Y_train, y_validation, y_train, epochs, fold, validation, model, new_model=True, early_stopping=False, model_checkpoint_cb=None):
+def train_fold(X_validation, X_train, Y_validation, Y_train, y_validation, y_train, epochs, fold, validation, model,
+               new_model=True, early_stopping=False, model_checkpoint_cb=None):
     """
     Train a fold
     :param X_validation: the image validation set
@@ -284,7 +285,8 @@ def train_fold(X_validation, X_train, Y_validation, Y_train, y_validation, y_tra
     return history, current_model
 
 
-def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations=1, k=5, early_stopping=False, with_model_checkpoint=False, model_name="model"):
+def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations=1, k=5, early_stopping=False,
+                     with_model_checkpoint=False, model_name="model"):
     """
     :param model: the Keras neural network model
     :param dataset: the dataset, typically created with make_dataset_from_raster_files
@@ -315,7 +317,8 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
         # Model checkpoint callback should be created here to avoid resetting the 'best' property of the model checkpoint.
         # By doing so, we ensure that model checkpoint is the best across all cross validations.
         model_file = MODEL_PATH + model_name + ".hdf5"
-        model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True, mode='max')
+        model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True,
+                                              mode='max')
 
     for validation in range(nb_cross_validations):
         np.random.shuffle(dataset)
@@ -341,7 +344,8 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
                 new_model=True,
             )
 
-            conf_matrix, accuracy, loss = evaluate_model(trained_model, X_validation, Y_validation, y_validation, nb_labels)
+            conf_matrix, accuracy, loss = evaluate_model(trained_model, X_validation, Y_validation, y_validation,
+                                                         nb_labels)
 
             fold_size = len(y_train)
 
@@ -353,7 +357,8 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
     return mean_loss, mean_accuracy, histories, total_conf_matrix
 
 
-def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epochs, epochs_per_metrics, nb_cross_validations=1, k=5):
+def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epochs, epochs_per_metrics,
+                                            nb_cross_validations=1, k=5):
     """
     Cross validation that stops each n epochs to computes some metrics.
     Total number of epochs are divided by a number of epochs per metrics to get a number of metrics.
@@ -415,7 +420,8 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epoch
                     new_model=False,
                 )
 
-                conf_matrix, accuracy, loss = evaluate_model(current_model, X_validation, Y_validation, y_validation, nb_labels)
+                conf_matrix, accuracy, loss = evaluate_model(current_model, X_validation, Y_validation, y_validation,
+                                                             nb_labels)
 
                 fold_size = len(y_train)
 
@@ -483,82 +489,204 @@ def plot_confusion_matrix(confmatrix, labels_names, ax=None):
     ax.set_ylabel('true label')
 
 
-# def add_ndvi_to_dataset(dataset):
-#     for i, img in enumerate(dataset):
-#         red = np.asarray(img[1][3])
-#         nir = np.asarray(img[1][4])
-#         ndvi = (nir - red) / (nir + red)
-#         dataset[i][1].append(ndvi.tolist())
+def add_ndvi_to_dataset(dataset):
+    for i, img in enumerate(dataset):
+        red = np.asarray(img[1][3])
+        nir = np.asarray(img[1][4])
+        ndvi = (nir - red) / (nir + red)
+        ndvi = (ndvi + 1) / 2  # convert from [-1;1] to [0;1]
+        dataset[i][1].append(ndvi.tolist())
+
+
+def add_bu_to_dataset(dataset):
+    for i, img in enumerate(dataset):
+        red = np.asarray(img[1][3])
+        nir = np.asarray(img[1][4])
+        swir = np.asarray(img[1][5])
+        ndbi = (swir - nir) / (swir + nir)
+        ndvi = (nir - red) / (nir + red)
+        bu = ndbi - ndvi
+        bu = (bu + 1) / 2  # convert from [-1;1] to [0;1]
+        dataset[i][1].append(bu.tolist())
+
+
+def add_mndwi_to_dataset(dataset):
+    for i, img in enumerate(dataset):
+        green = np.asarray(img[1][2])
+        swir = np.asarray(img[1][5])
+        mndwi = (green - swir) / (green + swir)
+        mndwi = (mndwi + 1) / 2  # convert from [-1;1] to [0;1]
+        dataset[i][1].append(mndwi.tolist())
+
+
+def add_evi2_to_dataset(dataset):
+    for i, img in enumerate(dataset):
+        red = np.asarray(img[1][3])
+        nir = np.asarray(img[1][4])
+        evi2 = 2.4 * (nir - red) / (nir + red + 1)
+        evi2 = (evi2 + 1) / 2  # convert from [-1;1] to [0;1]
+        dataset[i][1].append(evi2.tolist())
+
+
+def spatial_separation_dataset(geo_df, labels):
+    labels_names = [label.name for label in labels]
+
+    nb_fold = 10
+    fold_list = [[[] for _ in range(len(labels_names))] for _ in range(nb_fold)]
+    labels_data = []
+
+    # Make 10 folds with a train and validation set of each label
+    for label_index, label_name in enumerate(labels_names):
+        label_data = geo_df[geo_df['labels_names'] == label_name]
+        labels_data.append(label_data)
+
+        fold = 0
+
+        for _, validation in spacv.SKCV(n_splits=nb_fold, buffer_radius=0.1).split(label_data):
+            fold_list[fold][label_index] = validation
+
+            fold += 1
+
+    np.random.shuffle(fold_list)
+
+    # We know that each validation set is unique
+    # we choose two validation sets for the test set
+    # and we keep other for the train and validation
+    nb_grouped_fold = 2
+
+    for i in range(0, nb_fold, nb_grouped_fold):
+        current_selected_fold = [i, i+1]
+        current_other = np.concatenate([np.arange(0, i), np.arange(i+2, nb_fold)])
+
+        selected_fold = pandas.DataFrame()
+        other = pandas.DataFrame()
+
+        for label in range(len(labels_names)):
+            selected_fold = selected_fold.append(
+                labels_data[label].iloc[np.concatenate([list(fold_list[fold][label]) for fold in current_selected_fold]).ravel().tolist()]
+            )
+
+            other = other.append(
+                labels_data[label].iloc[np.concatenate([list(fold_list[fold][label]) for fold in current_other]).ravel().tolist()]
+            )
+
+        yield selected_fold, other
+
+
+def spatial_cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations=1, early_stopping=False,
+                             with_model_checkpoint=False, model_name="model"):
+    """
+    Spatial cross validation to train on a region and validate with another
+    :param model:  Keras neural network model
+    :param dataset: dataset, typically created with make_dataset_from_raster_files
+    :param bands: an array of the position of the bands to use. ex: [3, 2, 1] will select bands Red, Green, Blue
+    if the dataset contains images with all bands. Bands positions start at zero.
+    :param labels: an array of selected labels. Those labels should be entries of Label enum defined in labelsUtils.py
+    :param epochs: number of epochs
+    :param nb_cross_validations: number of time to repeat the cross validation
+    :param early_stopping: defines if early stopping is used
+    :param model_name: Keras neural network model
+    :param with_model_checkpoint: defines if model checkpoint should be used.
+    :return: mean loss, mean accuracy, array of each history and the confusion matrix
+    """
+    labels_names = [label.name for label in labels]
+    nb_labels = len(labels_names)
+    histories = []
+    mean_loss = 0
+    mean_accuracy = 0
+    total_conf_matrix = np.zeros((len(labels_names), len(labels_names)))
+
+    model.summary()
+
+    model_checkpoint_cb = None
+    if with_model_checkpoint:
+        # Model checkpoint callback should be created here to avoid resetting the 'best' property of the model checkpoint.
+        # By doing so, we ensure that model checkpoint is the best across all cross validations.
+        model_file = MODEL_PATH + model_name + ".hdf5"
+        model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True, mode='max')
+
+# for validation in range(nb_cross_validations):
+#     fold = 0
 #
-#     return dataset
+#     skcv = spacv.SKCV(n_splits=5, buffer_radius=0.1).split(gpd_df)
 #
+#     for train, val in skcv:
+#         train_set = [img for i, img in enumerate(dataset) if i in train]
+#         validation_set = [img for i, img in enumerate(dataset) if i in val]
 #
-# def add_mndwi_to_dataset(dataset):
-#     for i, img in enumerate(dataset):
-#         green = np.asarray(img[1][2])
-#         swir = np.asarray(img[1][5])
-#         mndwi = (green - swir) / (green + swir)
-#         dataset[i][1].append(mndwi.tolist())
+#         X_train = images_from_dataset(train_set, bands)
+#         y_train = labels_from_dataset(train_set, labels_names)
+#         Y_train = to_categorical(y_train, num_classes=nb_labels)
 #
-#     return dataset
+#         X_validation = images_from_dataset(validation_set, bands)
+#         y_validation = labels_from_dataset(validation_set, labels_names)
+#         Y_validation = to_categorical(y_validation, num_classes=nb_labels)
 #
-# def spatial_cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations=1, early_stopping=False):
-#     """
-#     Spatial cross validation to train on a region and validate with another
-#     :param model:  Keras neural network model
-#     :param dataset: dataset, typically created with make_dataset_from_raster_files
-#     :param bands: an array of the position of the bands to use. ex: [3, 2, 1] will select bands Red, Green, Blue
-#     if the dataset contains images with all bands. Bands positions start at zero.
-#     :param labels: an array of selected labels. Those labels should be entries of Label enum defined in labelsUtils.py
-#     :param epochs: number of epochs
-#     :param nb_cross_validations: number of time to repeat the cross validation
-#     :param early_stopping: defines if early stopping is used
-#     :return: mean loss, mean accuracy, array of each history and the confusion matrix
-#     """
+#         history, trained_model = train_fold(
+#             X_validation=X_validation,
+#             X_train=X_train,
+#             Y_validation=Y_validation,
+#             Y_train=Y_train,
+#             y_validation=y_validation,
+#             y_train=y_train,
+#             epochs=epochs,
+#             fold=fold,
+#             validation=validation,
+#             model=model,
+#             early_stopping=early_stopping,
+#             model_checkpoint_cb=model_checkpoint_cb,
+#             new_model=True,
+#         )
 #
-#     labels_names = [label.name for label in labels]
+#         conf_matrix, accuracy, loss = evaluate_model(trained_model, X_validation, Y_validation, y_validation,
+#                                                      nb_labels)
 #
-#     nb_labels = len(labels_names)
-#     histories = []
-#     mean_loss = 0
-#     mean_accuracy = 0
-#     total_conf_matrix = np.zeros((len(labels_names), len(labels_names)))
+#         fold_size = len(y_train)
 #
-#     model.summary()
+#         histories.append(history)
+#         total_conf_matrix += conf_matrix
+#         mean_accuracy += accuracy * fold_size / (len(dataset) * nb_cross_validations)
+#         mean_loss += loss * fold_size / (len(dataset) * nb_cross_validations)
 #
-#     df = pandas.DataFrame(dataset,  columns=['labels_names', 'images', 'coords'])
-#     labels_coordinates = gpd.GeoDataFrame(df, geometry='coords') # spacv requests a dataframe
+#         fold += 1
 #
-#     for validation in range(nb_cross_validations):
-#         fold = 0
-#
-#         skcv = spacv.SKCV(n_splits=5, buffer_radius=0.1).split(labels_coordinates)
-#
-#         for train, validation in skcv:
-#             train = [img for i, img in enumerate(dataset) if i in train]
-#             validation = [img for i, img in enumerate(dataset) if i in validation]
-#
-#             X_train = images_from_dataset(train, bands)
-#             y_train = labels_from_dataset(train, labels_names)
-#             Y_train = to_categorical(y_train, num_classes=nb_labels)
-#
-#             X_validation = images_from_dataset(validation, bands)
-#             y_validation = labels_from_dataset(validation, labels_names)
-#             Y_validation = to_categorical(y_validation, num_classes=nb_labels)
-#
-#             history, conf_matrix, accuracy, loss = train_and_evaluate_fold(
-#                 X_validation, X_train, Y_validation, Y_train, y_validation, y_train,
-#                 epochs, fold, model, nb_labels,
-#                 early_stopping
-#             )
-#
-#             fold_size = len(y_train)
-#
-#             histories.append(history)
-#             total_conf_matrix += conf_matrix
-#             mean_accuracy += accuracy * fold_size / (len(dataset) * nb_cross_validations)
-#             mean_loss += loss * fold_size / (len(dataset) * nb_cross_validations)
-#
-#             fold += 1
-#
-#     return mean_loss, mean_accuracy, histories, total_conf_matrix
+# return mean_loss, mean_accuracy, histories, total_conf_matrix
+
+
+def display_cross_val_map_class(fold_sets, map_shape, title, legends=["Other", "Test"], xlim=[106,110], ylim=[10, 16], figsize=(12, 6)):
+    """
+    code adapted from Romain Capocasale Master thesis display_cross_val_map_class
+    :param sets
+    :param map_shape:
+    :param title:
+    :param legend1:
+    :param legend2:
+    :param xlim:
+    :param ylim:
+    :param figsize:
+    :return:
+    """
+
+    fig, ax = pl.subplots(figsize=figsize)
+    map_shape.plot(ax=ax, facecolor='Grey', edgecolor='k', alpha=0.5, linewidth=0.3)
+
+    ax.set_prop_cycle(pl.cycler('color', ['tab:orange', 'tab:green', 'tab:red', 'tab:blue', 'tab:purple', 'tab:brown']))
+
+    for fold_set in fold_sets:
+        fold_set.plot(ax=ax, markersize=1, categorical=True, legend=True)
+
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
+    ax.set_xlabel("Latitude")
+    ax.set_ylabel("Longitude")
+
+    legend = ax.legend(legends)
+
+    for handle in legend.legendHandles:
+        handle.set_sizes([30])
+
+    fig.suptitle(title)
+
+
+
