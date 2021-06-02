@@ -76,7 +76,7 @@ def statistics(raster_paths, labels, group_names, labels_coordinates_list, title
     # Get values for each label we are interested in
     labels_values = labels_values_from_raster_files(labels, raster_paths, labels_coordinates_list, nb_pixel_around)
 
-    columns = ['coastal aerosol', 'blue', 'green', 'red', 'nir', 'swir 1', 'swir 2', 'panchromatic']
+    columns = ['coastal aerosol', 'blue', 'green', 'red', 'nir', 'swir 1', 'swir 2']
     df = dataframe_from_labels_values(labels_values, columns, group_names)
 
     if draw_boxplot:

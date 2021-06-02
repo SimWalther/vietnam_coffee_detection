@@ -6,6 +6,19 @@ ee.Initialize()
 
 # Landsat 8 collection
 SATELLITE_DATASET = "LANDSAT/LC08/C01/T1_SR"
+# Warning: surface reflectance dataset bands are not in the same order as the original band designation
+# There's no panchromatic band and cirrus band is replaced by pixel_qa :
+# https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C01_T1_SR#bands
+# B1 	0.0001 	0.435-0.451 μm Band 1 (ultra blue) surface reflectance
+# B2 	0.0001 	0.452-0.512 μm Band 2 (blue) surface reflectance
+# B3 	0.0001 	0.533-0.590 μm Band 3 (green) surface reflectance
+# B4 	0.0001 	0.636-0.673 μm Band 4 (red) surface reflectance
+# B5 	0.0001 	0.851-0.879 μm Band 5 (near infrared) surface reflectance
+# B6 	0.0001 	1.566-1.651 μm Band 6 (shortwave infrared 1) surface reflectance
+# B7    0.0001 	2.107-2.294 μm Band 7 (shortwave infrared 2) surface reflectance
+# B10 	Kelvin 	0.1 	10.60-11.19 μm Band 10 brightness temperature.
+# B11 	Kelvin 	0.1 	11.50-12.51 μm Band 11 brightness temperature.
+# pixel_qa Pixel quality attributes generated from the CFMASK algorithm.
 
 # Rectangle region of interest
 REGION_RECTANGLE = ee.Geometry.Rectangle([
@@ -91,7 +104,11 @@ def create_image_collection(start_date, end_date):
     return ee.ImageCollection(SATELLITE_DATASET) \
         .filterDate(start_date, end_date) \
         .filterBounds(REGION_RECTANGLE) \
-        .map(mask_clouds)
+        .map(mask_clouds) \
+        .select(
+            ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B10', 'B11'],
+            ['Ultra blue', 'blue', 'green', 'red', 'nir', 'swir1', 'swir2', 'tirs1', 'tirs2'],
+        )
 
 
 def create_export_task(img, folder_name):
@@ -126,18 +143,18 @@ def image_collection_to_median_img(image_collection):
 
 
 # -------------------------- DRY SEASON
+# image_collection_2014 = create_image_collection('2014-11-01', '2015-05-01')
+# image_collection_2015 = create_image_collection('2015-11-01', '2016-05-01')
 # image_collection_2016 = create_image_collection('2016-11-01', '2017-05-01')
 # image_collection_2017 = create_image_collection('2017-11-01', '2018-05-01')
 # image_collection_2018 = create_image_collection('2018-11-01', '2019-05-01')
 
 # -------------------------- WET SEASON
+# image_collection_2014 = create_image_collection('2014-05-01', '2014-10-01')
+# image_collection_2015 = create_image_collection('2015-05-01', '2015-10-01')
 # image_collection_2016 = create_image_collection('2016-05-01', '2016-10-01')
 # image_collection_2017 = create_image_collection('2017-05-01', '2017-10-01')
 # image_collection_2018 = create_image_collection('2018-05-01', '2018-10-01')
-#
-# merged_image_collections = image_collection_2016 \
-#     .merge(image_collection_2017) \
-#     .merge(image_collection_2018)
 
 # -------------------------- 2 MONTHS
 # image_collection_2014 = create_image_collection('2014-01-01', '2014-03-01')
@@ -189,7 +206,7 @@ def image_collection_to_median_img(image_collection):
 # image_collection_2020 = create_image_collection('2020-11-01', '2021-01-01')
 
 # -------------------------- 2014 - 2020
-# image_collection = create_image_collection('2014-01-01', '2021-01-01')
+image_collection = create_image_collection('2014-01-01', '2021-01-01')
 
 # -------------------------- January to april, 2017
 # image_collection = create_image_collection('2017-01-01', '2017-05-01')
@@ -198,11 +215,18 @@ def image_collection_to_median_img(image_collection):
 # image_collection = create_image_collection('2017-01-01', '2017-03-01')
 
 # -------------------------- March to April, 2017
-image_collection = create_image_collection('2017-03-01', '2017-05-01')
+# image_collection = create_image_collection('2017-03-01', '2017-05-01')
 
+# merged_image_collections = image_collection_2014 \
+#     .merge(image_collection_2015) \
+#     .merge(image_collection_2016) \
+#     .merge(image_collection_2017) \
+#     .merge(image_collection_2018) \
+#     .merge(image_collection_2019) \
+#     .merge(image_collection_2020)
 
 median_img = image_collection_to_median_img(image_collection)
-export_task = create_export_task(median_img, '2017_march_april')
+export_task = create_export_task(median_img, 'Vietnam_2014_2020')
 
 # Start the task
 start_task(export_task)

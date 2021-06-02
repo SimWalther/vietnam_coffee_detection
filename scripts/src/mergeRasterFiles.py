@@ -7,7 +7,7 @@ import rasterio.plot
 ROOT_PATH = "../data/"
 
 FOLDER_NAMES = [
-    "Vietnam_2014_2020"
+    "Vietnam_2014_2020",
 ]
 
 
@@ -36,7 +36,7 @@ for folder_name in FOLDER_NAMES:
         "height": merged_result.shape[1],
         "width": merged_result.shape[2],
         "transform": out_transform,
-        "crs": raster_files[0].crs.to_proj4()
+        "crs": raster_files[0].crs
     })
 
     print("Writing merged raster to disk...")

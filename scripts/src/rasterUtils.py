@@ -3,6 +3,11 @@ import shapely.geometry
 import rasterio.mask
 import numpy as np
 import geojson
+import os
+import pathlib
+
+DATA_ROOT_PATH = '../data/'
+DATASET_IMAGES_PATH = DATA_ROOT_PATH + 'datasets/images/'
 
 
 def image_n_px_around_coordinates(coordinates, nb_pixel_around, raster):
@@ -60,8 +65,8 @@ def label_median_values(label, raster, labels_coordinates, nb_pixel_around):
 
         # Don't add data if all values are 'NaN'
         if not np.isnan(out_img).all():
-            # Add median values of each band (excepted cirrus, tirs1, tirs2) while filtering nodata values
-            values.append([np.nanmedian(out_img[i]) for i in range(0, 8)])
+            # Add median values of each band (tirs1, tirs2) while filtering nodata values
+            values.append([np.nanmedian(out_img[i]) for i in range(0, 7)])
 
     return np.array(values)
 
@@ -89,7 +94,7 @@ def labels_values_from_raster_files(labels, raster_paths, labels_coordinates_lis
     return values
 
 
-def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list, nb_pixel_around):
+def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list, nb_pixel_around, save_on_disk=False, dataset_folder_name=""):
     """
     Make a dataset by taking images around provided labels. Multiple rasters can be given and in this case images are
     taken inside every rasters.
@@ -99,8 +104,20 @@ def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list
     :param labels_coordinates_list: a list of dictionary of all coordinates for each labels.
     This a list to enable having multiple dictionaries created separately without having to merge them into one
     :param nb_pixel_around: the number of pixel to take around labels
+    :param save_on_disk: defines if images need to be saved on disk
+    :param dataset_folder_name: name of the folder where to save images to
     :return: the dataset
     """
+
+    dataset_folder_path = None
+
+    if save_on_disk:
+        assert dataset_folder_name != ""
+
+        dataset_folder_path = os.path.join(DATASET_IMAGES_PATH, dataset_folder_name)
+
+        # Create parent directory if they doesn't exists
+        pathlib.Path(dataset_folder_path).mkdir(parents=True, exist_ok=True)
 
     values = []
 
@@ -108,7 +125,7 @@ def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list
         with rasterio.open(path) as raster:
             for labels_coordinates in labels_coordinates_list:
                 for label in labels:
-                    for coordinates in labels_coordinates[label.value]:
+                    for label_image_index, coordinates in enumerate(labels_coordinates[label.value]):
                         out_img, out_transform = image_n_px_around_coordinates(
                             coordinates, nb_pixel_around, raster
                         )
@@ -120,5 +137,22 @@ def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list
                         # Don't add data if there is 'NaN' values
                         if not np.isnan(out_img).any():
                             values.append([label.name, out_img.tolist(), point])
+
+                            if save_on_disk:
+                                metadata = raster.meta.copy()
+
+                                metadata.update({
+                                    "driver": "GTiff",
+                                    "height": out_img.shape[1],
+                                    "width": out_img.shape[2],
+                                    "transform": out_transform,
+                                    "crs": raster.crs
+                                })
+
+                                filename = label.name + "_" + str(label_image_index)
+
+                                # Write merged raster to disk
+                                # with rasterio.open(dataset_folder_path + filename, "w", **metadata) as dest:
+                                #     dest.write(raster, )
 
     return values
