@@ -109,22 +109,20 @@ def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list
     :return: the dataset
     """
 
-    dataset_folder_path = None
-
-    if save_on_disk:
-        assert dataset_folder_name != ""
-
-        dataset_folder_path = os.path.join(DATASET_IMAGES_PATH, dataset_folder_name)
-
-        # Create parent directory if they doesn't exists
-        pathlib.Path(dataset_folder_path).mkdir(parents=True, exist_ok=True)
-
     values = []
 
     for i, path in enumerate(raster_paths):
         with rasterio.open(path) as raster:
             for labels_coordinates in labels_coordinates_list:
                 for label in labels:
+                    label_folder_path = None
+
+                    if save_on_disk:
+                        label_folder_path = os.path.join(DATASET_IMAGES_PATH, dataset_folder_name, label.name.lower())
+
+                        # Create directories if they don't exists
+                        pathlib.Path(label_folder_path).mkdir(parents=True, exist_ok=True)
+
                     for label_image_index, coordinates in enumerate(labels_coordinates[label.value]):
                         out_img, out_transform = image_n_px_around_coordinates(
                             coordinates, nb_pixel_around, raster
@@ -136,9 +134,12 @@ def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list
 
                         # Don't add data if there is 'NaN' values
                         if not np.isnan(out_img).any():
-                            values.append([label.name, out_img.tolist(), point])
-
                             if save_on_disk:
+                                filepath = os.path.join(label_folder_path, str(label_image_index) + '.tiff')
+
+                                # append filepath in dataset where raster is saved not the whole raster
+                                values.append([label.name, filepath, point])
+
                                 metadata = raster.meta.copy()
 
                                 metadata.update({
@@ -149,10 +150,11 @@ def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list
                                     "crs": raster.crs
                                 })
 
-                                filename = label.name + "_" + str(label_image_index)
-
                                 # Write merged raster to disk
-                                # with rasterio.open(dataset_folder_path + filename, "w", **metadata) as dest:
-                                #     dest.write(raster, )
+                                with rasterio.open(filepath, "w", **metadata) as dest:
+                                    dest.write(out_img)
+                            else:
+                                # append whole rasters to dataset if we don't save rasters on the disk
+                                values.append([label.name, out_img.tolist(), point])
 
     return values
