@@ -156,7 +156,7 @@ def train_model(model, train_datagen, validation_datagen, class_weights, epochs,
     :param epochs: the number of epochs
     :param steps_per_epoch: the number of steps per epoch
     :param early_stopping: defines if early stopping is used
-    :return: the train history
+    :return: the train history and the trained model
     """
 
     callbacks = [Metrics(train_datagen=train_datagen, validation_datagen=validation_datagen)]
@@ -177,7 +177,8 @@ def train_model(model, train_datagen, validation_datagen, class_weights, epochs,
         callbacks=callbacks
     )
 
-    return model.fit(**fit_args)
+    history = model.fit(**fit_args)
+    return history, model
 
 
 def separate_data_into_images_and_labels(data, labels_names, bands):
@@ -351,7 +352,8 @@ def cross_validation_from_csv_files(model, other_filename, test_filename, bands,
         fold = 0
 
         for validation, train in spatial_separation_dataset(other_df, labels):
-            # display_cross_val_map_class([train, validation, test_df], vietnam_shape, f"Cross validation split fold", ["Train", "Validation", "Test"])
+            display_cross_val_map_class([train, validation, test_df], vietnam_shape, f"Cross validation split fold", legends=["Train", "Validation", "Test"])
+
             X_train = prepare_images(train['images'].to_numpy(), bands)
             X_validation = prepare_images(validation['images'].to_numpy(), bands)
             y_train = np.array([labels_names.index(label) for label in train['label'].to_numpy()])
