@@ -7,7 +7,7 @@ import rasterio.plot
 ROOT_PATH = "../data/"
 
 FOLDER_NAMES = [
-    "Vietnam_2014_2020",
+    "Vietnam_2017_whole_year",
 ]
 
 

@@ -206,12 +206,12 @@ def image_collection_to_median_img(image_collection):
 # image_collection_2020 = create_image_collection('2020-11-01', '2021-01-01')
 
 # -------------------------- 2014 - 2020
-image_collection = create_image_collection('2014-01-01', '2021-01-01')
+# image_collection = create_image_collection('2014-01-01', '2021-01-01')
 
-# -------------------------- January to april, 2017
-# image_collection = create_image_collection('2017-01-01', '2017-05-01')
+# -------------------------- January to April, 2017
+# image_collection = create_image_collection('2017-01-01', '2017-04-01')
 
-# -------------------------- January to March, 2017
+# -------------------------- January to February, 2017
 # image_collection = create_image_collection('2017-01-01', '2017-03-01')
 
 # -------------------------- March to April, 2017
@@ -225,8 +225,10 @@ image_collection = create_image_collection('2014-01-01', '2021-01-01')
 #     .merge(image_collection_2019) \
 #     .merge(image_collection_2020)
 
+image_collection = create_image_collection('2017-01-01', '2018-01-01')
+
 median_img = image_collection_to_median_img(image_collection)
-export_task = create_export_task(median_img, 'Vietnam_2014_2020')
+export_task = create_export_task(median_img, 'Vietnam_2017_whole_year')
 
 # Start the task
 start_task(export_task)

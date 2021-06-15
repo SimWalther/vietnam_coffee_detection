@@ -14,6 +14,8 @@ import os
 import spacv
 from libtiff import TIFF
 from rasterio.plot import reshape_as_image
+from rasterUtils import square_chunks
+from sklearn.model_selection import StratifiedKFold
 
 from albumentations import (
     Compose,
@@ -22,6 +24,7 @@ from albumentations import (
     VerticalFlip,
     RandomRotate90,
 )
+
 
 DATA_ROOT_PATH = '../data/'
 MODEL_PATH = '../models/'
@@ -45,28 +48,34 @@ AUGMENTATIONS = Compose([
 VALIDATION_AUGMENTATIONS = Compose([])
 
 
-# FIXME: shuffle data generators
 class LandsatSequence(Sequence):
     """
-    Code taken from https://medium.com/the-artificial-impostor/custom-image-augmentation-with-keras-70595b01aeac
+    Code inspired by https://medium.com/the-artificial-impostor/custom-image-augmentation-with-keras-70595b01aeac,
+    and https://github.com/keras-team/keras/issues/9707
     """
 
     def __init__(self, x_set, y_set, batch_size, augmentations):
-        self.x, self.y = x_set, y_set
+        self.x = x_set
+        self.y = y_set
         self.batch_size = batch_size
         self.augment = augmentations
+        self.batch_indices = np.arange(len(self.x))
 
     def __len__(self):
         return int(np.ceil(len(self.x) / float(self.batch_size)))
 
     def __getitem__(self, idx):
-        batch_x = self.x[idx * self.batch_size:(idx + 1) * self.batch_size]
-        batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
+        indices = self.batch_indices[idx * self.batch_size:(idx + 1) * self.batch_size]
+        batch_x = self.x[indices]
+        batch_y = self.y[indices]
 
         return np.stack(
             [self.augment(image=image)["image"] for image in batch_x],
             axis=0
         ), np.array(batch_y)
+
+    def on_epoch_end(self):
+        np.random.shuffle(self.batch_indices)
 
 
 class Metrics(Callback):
@@ -95,7 +104,7 @@ class Metrics(Callback):
         predicted_train = np.argmax(np.asarray(self.model.predict(train_images)), axis=-1)
         f1_score_train = me.f1_score(target_train, predicted_train, average="macro")
 
-        validation_images, validation_classes = elements_inside_data_generator(self.train_datagen)
+        validation_images, validation_classes = elements_inside_data_generator(self.validation_datagen)
         target_validation = np.argmax(validation_classes, axis=-1)
         predicted_validation = np.argmax(np.asarray(self.model.predict(validation_images)), axis=-1)
         f1_score_val = me.f1_score(target_validation, predicted_validation, average="macro")
@@ -159,7 +168,13 @@ def train_model(model, train_datagen, validation_datagen, class_weights, epochs,
     :return: the train history and the trained model
     """
 
-    callbacks = [Metrics(train_datagen=train_datagen, validation_datagen=validation_datagen)]
+    callbacks = []
+
+    if validation_datagen is not None:
+        callbacks.append(Metrics(train_datagen=train_datagen, validation_datagen=validation_datagen))
+    else:
+        assert not early_stopping, "early stopping cannot be used without validation data"
+        assert not model_checkpoint_cb, "model checkpoint callback cannot be used without validation data"
 
     if early_stopping:
         callbacks.append(EarlyStopping(monitor='f1_score_val', patience=100, mode="max"))
@@ -181,39 +196,6 @@ def train_model(model, train_datagen, validation_datagen, class_weights, epochs,
     return history, model
 
 
-def separate_data_into_images_and_labels(data, labels_names, bands):
-    images = images_from_dataset(data, bands)
-    labels = labels_from_dataset(data, labels_names)
-    one_hot_labels = to_categorical(labels, num_classes=len(labels_names))
-
-    return images, labels, one_hot_labels
-
-
-def split_fold_into_train_validation_sets(dataset, fold_start, fold_end, labels_names, bands):
-    """
-    Get train and validation sets from a given fold
-    :param dataset: the dataset
-    :param fold_start: start position of the fold in the dataset
-    :param fold_end: end position of the fold in the dataset
-    :param labels_names: the names of the labels to keep in the dataset
-    :return:
-    the image train set,
-    the correct labels of validation set,
-    the correct labels of train set in one hot encoding,
-    the image validation set,
-    the correct labels of validation set,
-    the correct labels of validation set in one hot encoding
-    """
-
-    train = dataset[fold_start:fold_end]
-    validation = dataset[:fold_start] + dataset[fold_end:]
-
-    X_train, y_train, Y_train = separate_data_into_images_and_labels(train, labels_names, bands)
-    X_validation, y_validation, Y_validation = separate_data_into_images_and_labels(validation, labels_names, bands)
-
-    return X_train, y_train, Y_train, X_validation, y_validation, Y_validation
-
-
 def evaluate_model(model, X_test, Y_test, y_test, nb_labels):
     # Evaluate model
     score = model.evaluate(X_test, Y_test, verbose=0)
@@ -228,6 +210,17 @@ def evaluate_model(model, X_test, Y_test, y_test, nb_labels):
     conf_matrix = me.confusion_matrix(y_test, pred, labels=np.arange(nb_labels))
 
     return conf_matrix, accuracy, loss
+
+
+def compute_class_weights(y_train):
+    # Compute each classes weight
+    class_weights = class_weight.compute_class_weight(
+        class_weight='balanced',
+        classes=np.unique(y_train),
+        y=y_train
+    )
+
+    return dict(enumerate(class_weights))
 
 
 def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations=1, k=5, early_stopping=False,
@@ -265,27 +258,23 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
         model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True,
                                               mode='max')
 
-    for nth_cross_validation in range(nb_cross_validations):
-        np.random.shuffle(dataset)
+    images = images_from_dataset(dataset, bands)
+    true_classes = labels_from_dataset(dataset, labels_names)
 
-        for fold, fold_indices in enumerate(k_fold_indices(dataset, k)):
-            X_train, y_train, Y_train, X_validation, y_validation, Y_validation = split_fold_into_train_validation_sets(
-                dataset, fold_indices[0], fold_indices[1], labels_names, bands
-            )
+    for nth_cross_validation in range(nb_cross_validations):
+        fold = 0
+
+        for train_index, validation_index in StratifiedKFold(n_splits=k, shuffle=True).split(images, true_classes):
+            X_train, X_validation = images[train_index], images[validation_index]
+            y_train, y_validation = true_classes[train_index], true_classes[validation_index]
+            Y_train = to_categorical(y_train, num_classes=len(labels_names))
+            Y_validation = to_categorical(y_validation, num_classes=len(labels_names))
 
             # create data generators
-            batch_size = 32
-            train_datagen = LandsatSequence(X_train, Y_train, batch_size, AUGMENTATIONS)
-            validation_datagen = LandsatSequence(X_validation, Y_validation, batch_size, VALIDATION_AUGMENTATIONS)
+            train_datagen = LandsatSequence(X_train, Y_train, batch_size=32, augmentations=AUGMENTATIONS)
+            validation_datagen = LandsatSequence(X_validation, Y_validation, batch_size=32, augmentations=VALIDATION_AUGMENTATIONS)
 
-            # Compute each classes weight
-            class_weights = class_weight.compute_class_weight(
-                class_weight='balanced',
-                classes=np.unique(y_train),
-                y=y_train
-            )
-
-            class_weights = dict(enumerate(class_weights))
+            class_weights = compute_class_weights(y_train)
 
             print(f"\nValidation {nth_cross_validation + 1}, fold {fold + 1} :\n---------------------------\n")
 
@@ -314,6 +303,8 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
             total_conf_matrix += conf_matrix
             mean_accuracy += accuracy * fold_size / (len(dataset) * nb_cross_validations)
             mean_loss += loss * fold_size / (len(dataset) * nb_cross_validations)
+
+            fold += 1
 
     return mean_loss, mean_accuracy, histories, total_conf_matrix
 
@@ -354,8 +345,12 @@ def cross_validation_from_csv_files(model, other_filename, test_filename, bands,
         for validation, train in spatial_separation_dataset(other_df, labels):
             display_cross_val_map_class([train, validation, test_df], vietnam_shape, f"Cross validation split fold", legends=["Train", "Validation", "Test"])
 
-            X_train = prepare_images(train['images'].to_numpy(), bands)
-            X_validation = prepare_images(validation['images'].to_numpy(), bands)
+            X_train = np.asarray([
+                prepare_image(img, bands) for img in train['images'].to_numpy()
+            ])
+            X_validation = np.asarray([
+                prepare_image(img, bands) for img in validation['images'].to_numpy()
+            ])
             y_train = np.array([labels_names.index(label) for label in train['label'].to_numpy()])
             y_validation = np.array([labels_names.index(label) for label in validation['label'].to_numpy()])
             Y_train = to_categorical(y_train, num_classes=len(labels_names))
@@ -366,14 +361,7 @@ def cross_validation_from_csv_files(model, other_filename, test_filename, bands,
             train_datagen = LandsatSequence(X_train, Y_train, batch_size, AUGMENTATIONS)
             validation_datagen = LandsatSequence(X_validation, Y_validation, batch_size, VALIDATION_AUGMENTATIONS)
 
-            # Compute each classes weight
-            class_weights = class_weight.compute_class_weight(
-                class_weight='balanced',
-                classes=np.unique(y_train),
-                y=y_train
-            )
-
-            class_weights = dict(enumerate(class_weights))
+            class_weights = compute_class_weights(y_train)
 
             print(f"\nValidation {nth_cross_validation + 1}, fold {fold + 1} :\n---------------------------\n")
 
@@ -441,13 +429,17 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epoch
 
     model.summary()
 
-    for nth_cross_validation in range(nb_cross_validations):
-        np.random.shuffle(dataset)
+    images = images_from_dataset(dataset, bands)
+    true_classes = labels_from_dataset(dataset, labels)
 
-        for fold, fold_indices in enumerate(k_fold_indices(dataset, k)):
-            X_train, y_train, Y_train, X_validation, y_validation, Y_validation = split_fold_into_train_validation_sets(
-                dataset, fold_indices[0], fold_indices[1], labels_names, bands
-            )
+    for nth_cross_validation in range(nb_cross_validations):
+        fold = 0
+
+        for train_index, validation_index in StratifiedKFold(n_splits=k, shuffle=True).split(images, true_classes):
+            X_train, X_validation = images[train_index], images[validation_index]
+            y_train, y_validation = true_classes[train_index], true_classes[validation_index]
+            Y_train = to_categorical(y_train, num_classes=len(labels_names))
+            Y_validation = to_categorical(y_validation, num_classes=len(labels_names))
 
             # We must reinitialize the model each fold!
             current_model = clone_model(model)
@@ -461,14 +453,7 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epoch
                 train_datagen = LandsatSequence(X_train, Y_train, batch_size, AUGMENTATIONS)
                 validation_datagen = LandsatSequence(X_validation, Y_validation, batch_size, VALIDATION_AUGMENTATIONS)
 
-                # Compute each classes weight
-                class_weights = class_weight.compute_class_weight(
-                    class_weight='balanced',
-                    classes=np.unique(y_train),
-                    y=y_train
-                )
-
-                class_weights = dict(enumerate(class_weights))
+                class_weights = compute_class_weights(y_train)
 
                 print(f"\nValidation {nth_cross_validation + 1}, fold {fold + 1} :\n---------------------------\n")
 
@@ -493,32 +478,20 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epoch
                 mean_accuracies[metric] += accuracy * fold_size / (len(dataset) * nb_cross_validations)
                 mean_losses[metric] += loss * fold_size / (len(dataset) * nb_cross_validations)
 
+            fold += 1
+
     return mean_losses, mean_accuracies, histories, total_conf_matrices
 
 
-def prepare_images(images, bands):
-    """
-    Prepare images to have the right format and contains only bands we will use
-    Images format is converted from (bands, rows, columns) to (rows, columns, bands)
-    :param images: the images
-    :param bands: the bands to keep
-    :return: an images array
-    """
+def prepare_image(image, bands):
     # if this is a string we assume it's a path the image
-    # otherwise we process images as rasters
-    if isinstance(images[0], str):
-        images = np.array([TIFF.open(path, mode='r').read_image() for path in images])
-    else:
-        images = np.array([img for img in images])
+    # otherwise we process image as rasters
+    if isinstance(image, str):
+        image = TIFF.open(image, mode='r').read_image()
 
-    # Filter bands
-    images = [
-        [
-            img[band] for i, band in enumerate(bands)
-        ] for img in images
-    ]
-
-    return np.array([reshape_as_image(img) for img in images])
+    # filter bands
+    image = np.asarray([image[band] for i, band in enumerate(bands)])
+    return reshape_as_image(image)
 
 
 def images_from_dataset(dataset, bands):
@@ -527,7 +500,9 @@ def images_from_dataset(dataset, bands):
     :param dataset: the dataset
     :return: an images array
     """
-    return prepare_images(np.array([img[1] for img in dataset]), bands)
+    return np.asarray([
+        prepare_image(data[1], bands) for data in dataset
+    ])
 
 
 def labels_from_dataset(dataset, labels):
@@ -691,4 +666,20 @@ def display_cross_val_map_class(fold_sets, map_shape, title, legends=["Other", "
     fig.suptitle(title)
 
 
+# find all raster files in the folder and create a dataset with them
+def predict_on_raster(trained_model, raster_path, bands, square_size=9):
+    predictions = []
+    image_indices = []
 
+    for batch_images, batch_indices in square_chunks(raster_path, square_size):
+        images = np.asarray([
+            prepare_image(img, bands) for img in batch_images
+        ])
+
+        pred = trained_model.predict(images)
+        pred = np.argmax(pred, axis=-1)
+
+        predictions.extend(pred)
+        image_indices.extend(batch_indices)
+
+    return predictions, image_indices
