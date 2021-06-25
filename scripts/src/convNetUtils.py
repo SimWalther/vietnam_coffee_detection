@@ -1,8 +1,7 @@
-from tensorflow.keras.utils import Sequence
 from math import floor
-import matplotlib.pyplot as pl
 from sklearn.utils import class_weight
 from sklearn import metrics as me
+from tensorflow.keras.utils import Sequence
 from tensorflow.keras.models import clone_model
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, Callback
@@ -12,11 +11,11 @@ import pandas as pd
 import geopandas as gpd
 import os
 import spacv
-from libtiff import TIFF
+from tifffile.tifffile import imread
 from rasterio.plot import reshape_as_image
 from rasterUtils import square_chunks
 from sklearn.model_selection import StratifiedKFold
-
+from visualizationUtils import display_cross_val_map_class
 from albumentations import (
     Compose,
     HorizontalFlip,
@@ -24,7 +23,6 @@ from albumentations import (
     VerticalFlip,
     RandomRotate90,
 )
-
 
 DATA_ROOT_PATH = '../data/'
 MODEL_PATH = '../models/'
@@ -48,7 +46,7 @@ AUGMENTATIONS = Compose([
 VALIDATION_AUGMENTATIONS = Compose([])
 
 
-class LandsatSequence(Sequence):
+class ImageSequence(Sequence):
     """
     Code inspired by https://medium.com/the-artificial-impostor/custom-image-augmentation-with-keras-70595b01aeac,
     and https://github.com/keras-team/keras/issues/9707
@@ -72,7 +70,41 @@ class LandsatSequence(Sequence):
         return np.stack(
             [self.augment(image=image)["image"] for image in batch_x],
             axis=0
-        ), np.array(batch_y)
+        ), np.asarray(batch_y)
+
+    def on_epoch_end(self):
+        np.random.shuffle(self.batch_indices)
+
+
+class ImageMultiOutputSequence(Sequence):
+    """
+    Code inspired by https://medium.com/the-artificial-impostor/custom-image-augmentation-with-keras-70595b01aeac,
+    and https://github.com/keras-team/keras/issues/9707
+    """
+
+    def __init__(self, x_set, y_sets, output_names, batch_size, augmentations):
+        assert len(output_names) == len(y_sets), "You must have as many output sets as output names"
+        self.x = x_set
+        self.y = y_sets
+        self.output_names = output_names
+        self.batch_size = batch_size
+        self.augment = augmentations
+        self.batch_indices = np.arange(len(self.x))
+
+    def __len__(self):
+        return int(np.ceil(len(self.x) / float(self.batch_size)))
+
+    def __getitem__(self, idx):
+        indices = self.batch_indices[idx * self.batch_size:(idx + 1) * self.batch_size]
+        batch_x = self.x[indices]
+        batch_y = {
+            output_name: self.y[i][indices] for i, output_name in enumerate(self.output_names)
+        }
+
+        return np.stack(
+            [self.augment(image=image)["image"] for image in batch_x],
+            axis=0
+        ), batch_y
 
     def on_epoch_end(self):
         np.random.shuffle(self.batch_indices)
@@ -212,6 +244,22 @@ def evaluate_model(model, X_test, Y_test, y_test, nb_labels):
     return conf_matrix, accuracy, loss
 
 
+def evaluate_multi_output_model(model, X_test, Y_test, y_test):
+    # Evaluate model
+    score = model.evaluate(X_test, Y_test, verbose=0)
+    loss = score[0]
+    accuracy = score[1]
+
+    # Predict labels on batch
+    pred = model.predict_on_batch(X_test)
+    pred = [np.argmax(pred[i], axis=-1) for i in range(len(pred))]
+
+    # Confusion matrix
+    conf_matrices = [me.confusion_matrix(y_test[i], pred[i], labels=np.unique(y_test[i])) for i in range(len(pred))]
+
+    return conf_matrices, accuracy, loss
+
+
 def compute_class_weights(y_train):
     # Compute each classes weight
     class_weights = class_weight.compute_class_weight(
@@ -271,8 +319,9 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
             Y_validation = to_categorical(y_validation, num_classes=len(labels_names))
 
             # create data generators
-            train_datagen = LandsatSequence(X_train, Y_train, batch_size=32, augmentations=AUGMENTATIONS)
-            validation_datagen = LandsatSequence(X_validation, Y_validation, batch_size=32, augmentations=VALIDATION_AUGMENTATIONS)
+            train_datagen = ImageSequence(X_train, Y_train, batch_size=32, augmentations=AUGMENTATIONS)
+            validation_datagen = ImageSequence(X_validation, Y_validation, batch_size=32,
+                                               augmentations=VALIDATION_AUGMENTATIONS)
 
             class_weights = compute_class_weights(y_train)
 
@@ -295,7 +344,8 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
                 model_checkpoint_cb=model_checkpoint_cb,
             )
 
-            conf_matrix, accuracy, loss = evaluate_model(trained_model, X_validation, Y_validation, y_validation, nb_labels)
+            conf_matrix, accuracy, loss = evaluate_model(trained_model, X_validation, Y_validation, y_validation,
+                                                         nb_labels)
 
             fold_size = len(y_train)
 
@@ -310,7 +360,8 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
 
 
 def cross_validation_from_csv_files(model, other_filename, test_filename, bands, labels, epochs,
-                                     nb_cross_validations=1, early_stopping=False, with_model_checkpoint=False, model_name="model"):
+                                    nb_cross_validations=1, early_stopping=False, with_model_checkpoint=False,
+                                    model_name="model"):
     labels_names = [label.name for label in labels]
     nb_labels = len(labels_names)
     histories = []
@@ -337,13 +388,15 @@ def cross_validation_from_csv_files(model, other_filename, test_filename, bands,
         # Model checkpoint callback should be created here to avoid resetting the 'best' property of the model checkpoint.
         # By doing so, we ensure that model checkpoint is the best across all cross validations.
         model_file = MODEL_PATH + model_name + ".hdf5"
-        model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True, mode='max')
+        model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True,
+                                              mode='max')
 
     for nth_cross_validation in range(nb_cross_validations):
         fold = 0
 
         for validation, train in spatial_separation_dataset(other_df, labels):
-            display_cross_val_map_class([train, validation, test_df], vietnam_shape, f"Cross validation split fold", legends=["Train", "Validation", "Test"])
+            display_cross_val_map_class([train, validation, test_df], vietnam_shape, f"Cross validation split fold",
+                                        legends=["Train", "Validation", "Test"])
 
             X_train = np.asarray([
                 prepare_image(img, bands) for img in train['images'].to_numpy()
@@ -358,8 +411,8 @@ def cross_validation_from_csv_files(model, other_filename, test_filename, bands,
 
             # create data generators
             batch_size = 32
-            train_datagen = LandsatSequence(X_train, Y_train, batch_size, AUGMENTATIONS)
-            validation_datagen = LandsatSequence(X_validation, Y_validation, batch_size, VALIDATION_AUGMENTATIONS)
+            train_datagen = ImageSequence(X_train, Y_train, batch_size, AUGMENTATIONS)
+            validation_datagen = ImageSequence(X_validation, Y_validation, batch_size, VALIDATION_AUGMENTATIONS)
 
             class_weights = compute_class_weights(y_train)
 
@@ -382,7 +435,8 @@ def cross_validation_from_csv_files(model, other_filename, test_filename, bands,
                 model_checkpoint_cb=model_checkpoint_cb,
             )
 
-            conf_matrix, accuracy, loss = evaluate_model(trained_model, X_validation, Y_validation, y_validation, nb_labels)
+            conf_matrix, accuracy, loss = evaluate_model(trained_model, X_validation, Y_validation, y_validation,
+                                                         nb_labels)
 
             fold_size = len(y_train)
 
@@ -450,8 +504,8 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epoch
             for metric in range(nb_metrics):
                 # create data generators
                 batch_size = 32
-                train_datagen = LandsatSequence(X_train, Y_train, batch_size, AUGMENTATIONS)
-                validation_datagen = LandsatSequence(X_validation, Y_validation, batch_size, VALIDATION_AUGMENTATIONS)
+                train_datagen = ImageSequence(X_train, Y_train, batch_size, AUGMENTATIONS)
+                validation_datagen = ImageSequence(X_validation, Y_validation, batch_size, VALIDATION_AUGMENTATIONS)
 
                 class_weights = compute_class_weights(y_train)
 
@@ -487,7 +541,7 @@ def prepare_image(image, bands):
     # if this is a string we assume it's a path the image
     # otherwise we process image as rasters
     if isinstance(image, str):
-        image = TIFF.open(image, mode='r').read_image()
+        image = imread(image)
 
     # filter bands
     image = np.asarray([image[band] for i, band in enumerate(bands)])
@@ -513,73 +567,6 @@ def labels_from_dataset(dataset, labels):
     :return: a labels array
     """
     return np.array([labels.index(img[0]) for img in dataset])
-
-
-def plot_confusion_matrix(confmatrix, labels_names, ax=None):
-    """
-    This function generates a colored confusion matrix.
-    Code has been taken and adapted from plot_confusion_matrix of MLG course
-    :param confmatrix: the confusion matrix
-    :param labels_names: labels names
-    :param ax: matplotlib axes object to plot to
-    """
-    if ax is None:
-        ax = pl.subplot(111)
-
-    ax.matshow(confmatrix, interpolation='nearest', cmap=pl.cm.Blues)
-
-    for i in range(confmatrix.shape[0]):
-        for j in range(confmatrix.shape[1]):
-            ax.annotate(str(confmatrix[i, j]), xy=(j, i),
-                        horizontalalignment='center',
-                        verticalalignment='center',
-                        fontsize=8)
-    ax.set_xticks(np.arange(confmatrix.shape[0]))
-    ax.set_xticklabels([labels_names[label] for label in range(confmatrix.shape[0])], rotation='vertical')
-    ax.set_yticks(np.arange(confmatrix.shape[1]))
-    _ = ax.set_yticklabels([labels_names[label] for label in range(confmatrix.shape[1])])
-    ax.set_xlabel('predicted label')
-    ax.xaxis.set_label_position('top')
-    ax.set_ylabel('true label')
-
-
-def add_ndvi_to_dataset(dataset):
-    for i, img in enumerate(dataset):
-        red = np.asarray(img[1][3])
-        nir = np.asarray(img[1][4])
-        ndvi = (nir - red) / (nir + red)
-        ndvi = (ndvi + 1) / 2  # convert from [-1;1] to [0;1]
-        dataset[i][1].append(ndvi.tolist())
-
-
-def add_bu_to_dataset(dataset):
-    for i, img in enumerate(dataset):
-        red = np.asarray(img[1][3])
-        nir = np.asarray(img[1][4])
-        swir = np.asarray(img[1][5])
-        ndbi = (swir - nir) / (swir + nir)
-        ndvi = (nir - red) / (nir + red)
-        bu = ndbi - ndvi
-        bu = (bu + 1) / 2  # convert from [-1;1] to [0;1]
-        dataset[i][1].append(bu.tolist())
-
-
-def add_mndwi_to_dataset(dataset):
-    for i, img in enumerate(dataset):
-        green = np.asarray(img[1][2])
-        swir = np.asarray(img[1][5])
-        mndwi = (green - swir) / (green + swir)
-        mndwi = (mndwi + 1) / 2  # convert from [-1;1] to [0;1]
-        dataset[i][1].append(mndwi.tolist())
-
-
-def add_evi2_to_dataset(dataset):
-    for i, img in enumerate(dataset):
-        red = np.asarray(img[1][3])
-        nir = np.asarray(img[1][4])
-        evi2 = 2.4 * (nir - red) / (nir + red + 1)
-        evi2 = (evi2 + 1) / 2  # convert from [-1;1] to [0;1]
-        dataset[i][1].append(evi2.tolist())
 
 
 def spatial_separation_dataset(geo_df, labels):
@@ -609,19 +596,21 @@ def spatial_separation_dataset(geo_df, labels):
     np.random.shuffle(fold_list)
 
     for i in range(0, nb_fold, nb_grouped_fold):
-        current_selected_fold = [i, i+1]
-        current_other = np.concatenate([np.arange(0, i), np.arange(i+2, nb_fold)])
+        current_selected_fold = [i, i + 1]
+        current_other = np.concatenate([np.arange(0, i), np.arange(i + 2, nb_fold)])
 
         selected = pd.DataFrame()
         other = pd.DataFrame()
 
         for label in range(len(labels_names)):
             selected = selected.append(
-                labels_data[label].iloc[np.concatenate([list(fold_list[fold][label]) for fold in current_selected_fold]).ravel().tolist()]
+                labels_data[label].iloc[
+                    np.concatenate([list(fold_list[fold][label]) for fold in current_selected_fold]).ravel().tolist()]
             )
 
             other = other.append(
-                labels_data[label].iloc[np.concatenate([list(fold_list[fold][label]) for fold in current_other]).ravel().tolist()]
+                labels_data[label].iloc[
+                    np.concatenate([list(fold_list[fold][label]) for fold in current_other]).ravel().tolist()]
             )
 
         # shuffle rows
@@ -629,41 +618,6 @@ def spatial_separation_dataset(geo_df, labels):
         other = other.sample(frac=1).reset_index(drop=True)
 
         yield selected, other
-
-
-def display_cross_val_map_class(fold_sets, map_shape, title, legends=["Other", "Test"], xlim=[106,110], ylim=[10, 16], figsize=(12, 6)):
-    """
-    code adapted from Romain Capocasale Master thesis display_cross_val_map_class
-    :param fold_sets:
-    :param map_shape:
-    :param title:
-    :param legends:
-    :param xlim:
-    :param ylim:
-    :param figsize:
-    :return:
-    """
-
-    fig, ax = pl.subplots(figsize=figsize)
-    map_shape.plot(ax=ax, facecolor='Grey', edgecolor='k', alpha=0.5, linewidth=0.3)
-
-    ax.set_prop_cycle(pl.cycler('color', ['tab:orange', 'tab:green', 'tab:red', 'tab:blue', 'tab:purple', 'tab:brown']))
-
-    for fold_set in fold_sets:
-        fold_set.plot(ax=ax, markersize=1, categorical=True, legend=True)
-
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
-
-    ax.set_xlabel("Latitude")
-    ax.set_ylabel("Longitude")
-
-    legend = ax.legend(legends)
-
-    for handle in legend.legendHandles:
-        handle.set_sizes([30])
-
-    fig.suptitle(title)
 
 
 # find all raster files in the folder and create a dataset with them
@@ -683,3 +637,24 @@ def predict_on_raster(trained_model, raster_path, bands, square_size=9):
         image_indices.extend(batch_indices)
 
     return predictions, image_indices
+
+
+def predict_label_category_on_raster(trained_model, raster_path, bands, square_size=9):
+    label_predictions = []
+    category_predictions = []
+    image_indices = []
+
+    for batch_images, batch_indices in square_chunks(raster_path, square_size):
+        images = np.asarray([
+            prepare_image(img, bands) for img in batch_images
+        ])
+
+        pred = trained_model.predict(images)
+        label_pred = np.argmax(pred[0], axis=-1)
+        category_pred = np.argmax(pred[1], axis=-1)
+
+        label_predictions.extend(label_pred)
+        category_predictions.extend(category_pred)
+        image_indices.extend(batch_indices)
+
+    return label_predictions, category_predictions, image_indices

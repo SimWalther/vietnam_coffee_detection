@@ -1,24 +1,8 @@
 import pandas
 import numpy as np
 from sklearn import preprocessing
-from seaborn import FacetGrid, boxplot
 from rasterUtils import labels_values_from_raster_files
-
-
-def draw_bands_boxplots(df, hue, title):
-    """
-    draw boxplots of data in a given dataframe
-    :param df: the dataframe
-    :param hue: colors scheme
-    :param title: the boxplot title
-    """
-
-    g = FacetGrid(df, col="bands", col_wrap=4)
-    g.fig.suptitle(title)
-    g.map_dataframe(boxplot, x="bands", y="value", hue=hue)
-    g.add_legend()
-    g.set_titles(col_template="{col_name}")
-    g.set(xticklabels=[])
+from visualizationUtils import draw_bands_boxplots
 
 
 def normalize_dataframe(dataframe, columns):
