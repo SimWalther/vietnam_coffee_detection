@@ -63,6 +63,9 @@ class ImageSequence(Sequence):
         return int(np.ceil(len(self.x) / float(self.batch_size)))
 
     def __getitem__(self, idx):
+        # NOTE: It have image paths instead of rasters there but it would slow down the processing
+        # it would be an alternative if memory was constrained
+
         indices = self.batch_indices[idx * self.batch_size:(idx + 1) * self.batch_size]
         batch_x = self.x[indices]
         batch_y = self.y[indices]
@@ -484,7 +487,7 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epoch
     model.summary()
 
     images = images_from_dataset(dataset, bands)
-    true_classes = labels_from_dataset(dataset, labels)
+    true_classes = labels_from_dataset(dataset, labels_names)
 
     for nth_cross_validation in range(nb_cross_validations):
         fold = 0
@@ -559,14 +562,14 @@ def images_from_dataset(dataset, bands):
     ])
 
 
-def labels_from_dataset(dataset, labels):
+def labels_from_dataset(dataset, labels_names):
     """
     Extract labels from a dataset into a numpy array
     :param dataset: the dataset
-    :param labels: the labels to keep
+    :param labels_names: the names of the labels to keep
     :return: a labels array
     """
-    return np.array([labels.index(img[0]) for img in dataset])
+    return np.array([labels_names.index(img[0]) for img in dataset])
 
 
 def spatial_separation_dataset(geo_df, labels):

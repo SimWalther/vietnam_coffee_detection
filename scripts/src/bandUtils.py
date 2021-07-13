@@ -1,7 +1,24 @@
 from enum import Enum
 import numpy as np
 
+# With Landsat 8 Surface Reflectance Tier 1
+# class Band(Enum):
+#     COASTAL_AEROSOL = 0
+#     BLUE = 1
+#     GREEN = 2
+#     RED = 3
+#     NIR = 4
+#     SWIR1 = 5
+#     SWIR2 = 6
+#     TIRS1 = 7
+#     TIRS2 = 8
+#     NDVI = 9
+#     MNDWI = 10
+#     EVI2 = 11
+#     BU = 12
 
+
+# With Landsat 8 Level 2, Collection 2, Tier 1
 class Band(Enum):
     COASTAL_AEROSOL = 0
     BLUE = 1
@@ -11,11 +28,10 @@ class Band(Enum):
     SWIR1 = 5
     SWIR2 = 6
     TIRS1 = 7
-    TIRS2 = 8
-    NDVI = 9
-    MNDWI = 10
-    EVI2 = 11
-    BU = 12
+    NDVI = 8
+    MNDWI = 9
+    EVI2 = 10
+    BU = 11
 
 
 def add_ndvi_to_dataset(dataset):
