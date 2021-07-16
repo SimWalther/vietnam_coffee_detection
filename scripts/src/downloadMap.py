@@ -78,8 +78,8 @@ SATELLITE_DATASET = "LANDSAT/LC08/C02/T1_L2"
 
 # Rectangle region of interest
 REGION_RECTANGLE = ee.Geometry.Rectangle([
-    -89.4848, 15.5488,
-    -87.2884, 13.9015
+    106.9998606274592134, 10.9999604855719539,
+    109.0000494390797456, 15.5002505644255208
 ])
 
 
@@ -283,10 +283,10 @@ def image_collection_to_median_img(image_collection, country_name='Vietnam'):
 #     .merge(image_collection_2019) \
 #     .merge(image_collection_2020)
 
-image_collection = create_image_collection('2018-01-01', '2019-01-01')
+image_collection = create_image_collection('2019-01-01', '2020-01-01')
 
-median_img = image_collection_to_median_img(image_collection, "")
-export_task = create_export_task(median_img, 'Ocotopeque_2018_whole_year_collection2')
+median_img = image_collection_to_median_img(image_collection, "Vietnam")
+export_task = create_export_task(median_img, 'Vietnam_2019_whole_year_collection2')
 
 # Start the task
 start_task(export_task)

@@ -7,8 +7,9 @@ import time
 ROOT_PATH = "../data/"
 
 FOLDER_NAMES = [
-    "Sumatra_south_2018_whole_year_collection2"
+    "Vietnam_2019_whole_year_collection2"
 ]
+
 
 def open_raster_files(folder_path):
     """
