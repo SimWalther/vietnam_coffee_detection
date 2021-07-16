@@ -45,4 +45,4 @@ for folder_name in FOLDER_NAMES:
 
     print("Finished writing to disk")
 
-    time.sleep(45)  # sleep a little to let memory usage going down
+    time.sleep(45)  # sleep a little to let memory usage go down

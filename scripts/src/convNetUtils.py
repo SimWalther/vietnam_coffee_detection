@@ -120,7 +120,7 @@ class Metrics(Callback):
     Code inspired by: https://medium.com/@thongonary/how-to-compute-f1-score-for-each-epoch-in-keras-a1acd17715a2
     """
 
-    def __init__(self, train_datagen, validation_datagen):
+    def __init__(self, train_datagen=None, validation_datagen=None):
         """
         Initialize callback
         :param train: the train generator
@@ -133,19 +133,21 @@ class Metrics(Callback):
         self.validation_datagen = validation_datagen
 
     def on_epoch_end(self, epoch, logs={}):
-        # This will load every training data in memory
-        train_images, train_classes = elements_inside_data_generator(self.train_datagen)
-        target_train = np.argmax(train_classes, axis=-1)
-        predicted_train = np.argmax(np.asarray(self.model.predict(train_images)), axis=-1)
-        f1_score_train = me.f1_score(target_train, predicted_train, average="macro")
+        # Warning: This will load every training data in memory
 
-        validation_images, validation_classes = elements_inside_data_generator(self.validation_datagen)
-        target_validation = np.argmax(validation_classes, axis=-1)
-        predicted_validation = np.argmax(np.asarray(self.model.predict(validation_images)), axis=-1)
-        f1_score_val = me.f1_score(target_validation, predicted_validation, average="macro")
+        if self.train_datagen is not None:
+            train_images, train_classes = elements_inside_data_generator(self.train_datagen)
+            target_train = np.argmax(train_classes, axis=-1)
+            predicted_train = np.argmax(np.asarray(self.model.predict(train_images)), axis=-1)
+            f1_score_train = me.f1_score(target_train, predicted_train, average="macro")
+            logs['f1_score_train'] = f1_score_train
 
-        logs['f1_score_train'] = f1_score_train
-        logs['f1_score_val'] = f1_score_val
+        if self.validation_datagen is not None:
+            validation_images, validation_classes = elements_inside_data_generator(self.validation_datagen)
+            target_validation = np.argmax(validation_classes, axis=-1)
+            predicted_validation = np.argmax(np.asarray(self.model.predict(validation_images)), axis=-1)
+            f1_score_val = me.f1_score(target_validation, predicted_validation, average="macro")
+            logs['f1_score_val'] = f1_score_val
 
         return
 
@@ -306,8 +308,7 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
         # Model checkpoint callback should be created here to avoid resetting the 'best' property of the model checkpoint.
         # By doing so, we ensure that model checkpoint is the best across all cross validations.
         model_file = MODEL_PATH + model_name + ".hdf5"
-        model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True,
-                                              mode='max')
+        model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True, mode='max')
 
     images = images_from_dataset(dataset, bands)
     true_classes = labels_from_dataset(dataset, labels_names)

@@ -4,7 +4,6 @@ import rasterio.mask
 import numpy as np
 import geojson
 import os
-import pathlib
 
 DATA_ROOT_PATH = '../data/'
 DATASET_IMAGES_PATH = DATA_ROOT_PATH + 'datasets/images/'
@@ -151,7 +150,7 @@ def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list
                         folder_path = os.path.join(DATASET_IMAGES_PATH, dataset_folder_name, label.name.lower())
 
                         # Create directories if they don't exists
-                        pathlib.Path(folder_path).mkdir(parents=True, exist_ok=True)
+                        os.makedirs(folder_path, exist_ok=True)
 
                     for label_image_index, coordinates in enumerate(labels_coordinates[label.value]):
                         out_img, out_transform = image_around_coordinates(
