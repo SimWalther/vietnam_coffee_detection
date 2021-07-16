@@ -75,9 +75,90 @@ class Label(Enum):
 class LabelCategory(Enum):
     CULTURE = 0
     FOREST = 1
-    NATIVE_NO_TREE = 2
-    URBAN = 3
-    WATER = 4
+    URBAN = 2
+    WATER = 3
+    OTHER_NATURE = 4
+    OTHER_TREE = 5
+
+
+CATEGORIES_LABELS = {
+    LabelCategory.CULTURE: [
+        Label.COCOA,
+        Label.COFFEE,
+        Label.RUBBER,
+        Label.OIL_PALM,
+        Label.CASSAVA,
+        Label.SEASONAL_AGRICULTURE,
+        Label.COMPLEX_OIL_PALM,
+        Label.PEPPER,
+        Label.TEA,
+        Label.RICE,
+        Label.BANANA,
+        Label.PALM_GROWING,
+        Label.INTERCROP,
+        Label.BAMBOO,
+        Label.COCONUT,
+        Label.MANGO,
+        Label.ORCHARD,
+        Label.LOTUS,
+        Label.CASHEW,
+        Label.CASHEW_AND_COCOA,
+        Label.COFFEE_GROWING,
+        Label.COFFEE_SHADED,
+        Label.COFFEE_FULL_SUN,
+        Label.RUBBER_GROWING,
+        Label.PASSION_FRUIT,
+        Label.COCOA_SHADED,
+        Label.MACADAMIA,
+        Label.MACADAMIA_GROWING,
+        Label.PEPPER_AND_COFFEE,
+        Label.PEPPER_AND_OTHER,
+        Label.FLOODED_PLANTATION,
+        Label.ORCHARD_SMALL,
+        Label.STICK_FOR_PEPPER
+    ],
+    LabelCategory.FOREST: [
+        Label.SECONDARY_DEGRADED_FOREST,
+        Label.DECIDUOUS_FOREST,
+        Label.DENSE_FOREST
+    ],
+    LabelCategory.WATER: [
+        Label.WATER,
+        Label.WATER_OTHER,
+        Label.LAKE,
+        Label.RIVER
+    ],
+    LabelCategory.URBAN: [
+        Label.URBAN,
+        Label.ROAD,
+        Label.FARM_HOUSE,
+        Label.GREENHOUSE,
+        Label.MINE,
+        Label.MINE_BARESOIL,
+        Label.MINE_WATER
+    ],
+    LabelCategory.OTHER_NATURE: [
+        Label.PASTURE,
+        Label.SAVANA,
+        Label.OTHER_NO_TREE,
+        Label.NATIVE_NO_TREE,
+        Label.BURNED_LAND,
+        Label.SHRUBLAND_BUSHLAND,
+        Label.NATURAL_WETLAND,
+        Label.CUT_OFF_REGROW,
+        Label.BARE_SOIL,
+        Label.GRASSLAND,
+        Label.TRANSITION,
+        Label.SPARE_TREE
+    ],
+    LabelCategory.OTHER_TREE: [
+        Label.SHADE_TREE,
+        Label.ACACIA,
+        Label.TEAK_PLANTATION_FOREST,
+        Label.PINE_TREES,
+        Label.OTHER_TREE,
+    ]
+}
 
 
 def labels_coordinates_from_files(shapefiles_paths, boundaries):
@@ -109,32 +190,11 @@ def labels_coordinates_from_files(shapefiles_paths, boundaries):
 
 
 def category_from_label(label):
-    if (
-            label == Label.COFFEE or
-            label == Label.RUBBER or
-            label == Label.PEPPER or
-            label == Label.TEA or
-            label == Label.RICE or
-            label == Label.INTERCROP or
-            label == Label.STICK_FOR_PEPPER or
-            label == Label.SEASONAL_AGRICULTURE
-    ):
-        return LabelCategory.CULTURE
-    elif (
-            label == Label.DENSE_FOREST or
-            label == Label.OTHER_TREE or
-            label == Label.DECIDUOUS_FOREST or
-            label == Label.PINE_TREES
-    ):
-        return LabelCategory.FOREST
-    elif label == Label.NATIVE_NO_TREE:
-        return LabelCategory.NATIVE_NO_TREE
-    elif label == Label.URBAN:
-        return LabelCategory.URBAN
-    elif label == Label.WATER:
-        return LabelCategory.WATER
-    else:
-        return None
+    for labelCategory in LabelCategory:
+        if label in CATEGORIES_LABELS[labelCategory]:
+            return labelCategory
+
+    return None
 
 
 def categories_from_label_set(labels, label_set):

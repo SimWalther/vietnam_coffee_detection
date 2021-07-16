@@ -1,5 +1,4 @@
 import glob
-
 import rasterio
 import rasterio.merge
 import rasterio.plot
