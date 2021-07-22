@@ -14,7 +14,10 @@ import spacv
 from tifffile.tifffile import imread
 from rasterio.plot import reshape_as_image
 from rasterUtils import square_chunks
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
+
+from labelsUtils import categories_from_label_set
+from lossesUtils import categorical_focal_loss
 from visualizationUtils import display_cross_val_map_class
 from albumentations import (
     Compose,
@@ -132,16 +135,36 @@ class Metrics(Callback):
 
         if self.train_datagen is not None:
             train_images, train_classes = elements_inside_data_generator(self.train_datagen)
-            target_train = np.argmax(train_classes, axis=-1)
-            predicted_train = np.argmax(np.asarray(self.model.predict(train_images)), axis=-1)
-            f1_score_train = me.f1_score(target_train, predicted_train, average="macro")
+
+            if isinstance(self.train_datagen, ImageMultiOutputSequence):
+                target_train = [np.argmax(train_classes[output_name], axis=-1) for output_name in train_classes.keys()]
+                pred = self.model.predict(train_images)
+                predicted_train = [np.argmax(pred[i], axis=-1) for i in range(len(pred))]
+
+                # Here we define f1-score of the multi-output model as the mean of f1-score of each output
+                f1_score_train = np.mean([me.f1_score(target_train[i], predicted_train[i], average="macro") for i in range(len(predicted_train))])
+            else:
+                target_train = np.argmax(train_classes, axis=-1)
+                predicted_train = np.argmax(np.asarray(self.model.predict(train_images)), axis=-1)
+                f1_score_train = me.f1_score(target_train, predicted_train, average="macro")
+
             logs['f1_score_train'] = f1_score_train
 
         if self.validation_datagen is not None:
             validation_images, validation_classes = elements_inside_data_generator(self.validation_datagen)
-            target_validation = np.argmax(validation_classes, axis=-1)
-            predicted_validation = np.argmax(np.asarray(self.model.predict(validation_images)), axis=-1)
-            f1_score_val = me.f1_score(target_validation, predicted_validation, average="macro")
+
+            if isinstance(self.validation_datagen, ImageMultiOutputSequence):
+                target_validation = [np.argmax(validation_classes[output_name], axis=-1) for output_name in validation_classes.keys()]
+                pred = self.model.predict(validation_images)
+                predicted_validation = [np.argmax(pred[i], axis=-1) for i in range(len(pred))]
+
+                # Here we define f1-score of the multi-output model as the mean of f1-score of each output
+                f1_score_val = np.mean([me.f1_score(target_validation[i], predicted_validation[i], average="macro") for i in range(len(predicted_validation))])
+            else:
+                target_validation = np.argmax(validation_classes, axis=-1)
+                predicted_validation = np.argmax(np.asarray(self.model.predict(validation_images)), axis=-1)
+                f1_score_val = me.f1_score(target_validation, predicted_validation, average="macro")
+
             logs['f1_score_val'] = f1_score_val
 
         return
@@ -157,9 +180,17 @@ def elements_inside_data_generator(datagen):
 
     for i in range(len(datagen)):
         images.extend(datagen.__getitem__(i)[0])
-        true_classes.extend(datagen.__getitem__(i)[1].tolist())
 
-    return np.asarray(images), np.asarray(true_classes)
+        if isinstance(datagen.__getitem__(i)[1], dict):
+            for output_name, value in datagen.__getitem__(i)[1].items():
+                true_classes[output_name].extend(value.tolist())
+        else:
+            true_classes.extend(datagen.__getitem__(i)[1].tolist())
+
+    if not isinstance(datagen.__getitem__(i)[1], dict):
+        true_classes = np.asarray(true_classes)
+
+    return np.asarray(images), true_classes
 
 
 def k_fold_indices(dataset, k=5):
@@ -190,9 +221,11 @@ def k_fold_indices(dataset, k=5):
 
 
 def train_model(model, train_datagen, validation_datagen, class_weights, epochs, steps_per_epoch,
-                early_stopping=False, model_checkpoint_cb=None):
+                early_stopping=False, model_checkpoint_cb=None, categories=None):
     """
     Train a Keras neural network model
+    :param categories: categories used
+    :param model_checkpoint_cb: the checkpoint callback
     :param model: the Keras neural network model
     :param train_datagen train data generator
     :param validation_datagen validation data generator
@@ -206,8 +239,7 @@ def train_model(model, train_datagen, validation_datagen, class_weights, epochs,
 
     callbacks = []
 
-    if (not isinstance(train_datagen, ImageMultiOutputSequence)) and (not isinstance(validation_datagen, ImageMultiOutputSequence)):
-        callbacks.append(Metrics(train_datagen=train_datagen, validation_datagen=validation_datagen))
+    callbacks.append(Metrics(train_datagen=train_datagen, validation_datagen=validation_datagen))
 
     if early_stopping:
         callbacks.append(EarlyStopping(monitor='f1_score_val', patience=100, mode="max"))
@@ -304,7 +336,10 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
         # Model checkpoint callback should be created here to avoid resetting the 'best' property of the model checkpoint.
         # By doing so, we ensure that model checkpoint is the best across all cross validations.
         model_file = os.path.join(MODEL_ROOT_PATH, model_name + ".hdf5")
-        model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True, mode='max')
+        model_checkpoint_cb = ModelCheckpoint(
+            model_file, monitor='f1_score_val',
+            verbose=0, save_best_only=True, mode='max'
+        )
 
     images = images_from_dataset(dataset, bands)
     true_classes = labels_from_dataset(dataset, labels_names)
@@ -317,12 +352,16 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
             y_train, y_validation = true_classes[train_index], true_classes[validation_index]
             Y_train = to_categorical(y_train, num_classes=len(labels_names))
             Y_validation = to_categorical(y_validation, num_classes=len(labels_names))
+            fold_size = len(y_train)
 
             # create data generators
-            train_datagen = ImageSequence(X_train, Y_train, batch_size=32, augmentations=AUGMENTATIONS)
-            validation_datagen = ImageSequence(X_validation, Y_validation, batch_size=32,
-                                               augmentations=VALIDATION_AUGMENTATIONS)
-
+            train_datagen = ImageSequence(
+                X_train, Y_train, batch_size=32, augmentations=AUGMENTATIONS
+            )
+            validation_datagen = ImageSequence(
+                X_validation, Y_validation, batch_size=32,
+                augmentations=VALIDATION_AUGMENTATIONS
+            )
             class_weights = compute_class_weights(y_train)
 
             print(f"\nValidation {nth_cross_validation + 1}, fold {fold + 1} :\n---------------------------\n")
@@ -339,16 +378,118 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
                 validation_datagen=validation_datagen,
                 class_weights=class_weights,
                 epochs=epochs,
-                steps_per_epoch=len(y_train) / 32,
+                steps_per_epoch=fold_size / 32,
                 early_stopping=early_stopping,
                 model_checkpoint_cb=model_checkpoint_cb,
             )
 
-            conf_matrix, accuracy, loss = evaluate_model(trained_model, X_validation, Y_validation, y_validation,
-                                                         nb_labels)
+            conf_matrix, accuracy, loss = evaluate_model(trained_model, X_validation, Y_validation, y_validation, nb_labels)
 
-            fold_size = len(y_train)
+            histories.append(history)
+            total_conf_matrix += conf_matrix
+            mean_accuracy += accuracy * fold_size / (len(dataset) * nb_cross_validations)
+            mean_loss += loss * fold_size / (len(dataset) * nb_cross_validations)
 
+            fold += 1
+
+    return mean_loss, mean_accuracy, histories, total_conf_matrix
+
+
+def cross_validation_multi_output_model(model, dataset, bands, labels, epochs, nb_cross_validations=1, k=5, early_stopping=False,
+                                        with_model_checkpoint=False, model_name="model", categories=None):
+    """
+    :param categories: categories used
+    :param model: the Keras neural network model
+    :param dataset: the dataset, typically created with make_dataset_from_raster_files
+    :param bands: an array of the position of the bands to use. ex: [3, 2, 1] will select bands Red, Green, Blue
+    if the dataset contains images with all bands. Bands positions start at zero.
+    :param labels: an array of selected labels. Those labels should be entries of Label enum defined in labelsUtils.py
+    :param epochs: the number of epochs
+    :param nb_cross_validations: the number of time to repeat the cross validation.
+    :param k: the number of folds
+    :param early_stopping: defines if early stopping is used
+    :param model_name: name of the model, used to name the model file
+    :param with_model_checkpoint: defines if model checkpoint should be used.
+    :return: mean loss, mean accuracy, array of each history and the confusion matrix
+    """
+
+    labels_names = [label.name for label in labels]
+    nb_labels = len(labels_names)
+    histories = []
+    mean_loss = 0
+    mean_accuracy = 0
+    total_conf_matrix = np.zeros((len(labels_names), len(labels_names)))
+
+    model.summary()
+
+    model_checkpoint_cb = None
+
+    if with_model_checkpoint:
+        # Model checkpoint callback should be created here to avoid resetting the 'best' property of the model checkpoint.
+        # By doing so, we ensure that model checkpoint is the best across all cross validations.
+        model_file = os.path.join(MODEL_ROOT_PATH, model_name + ".hdf5")
+        model_checkpoint_cb = ModelCheckpoint(
+            model_file, monitor='f1_score_val',
+            verbose=0, save_best_only=True, mode='max'
+        )
+
+    images = images_from_dataset(dataset, bands)
+    true_classes = labels_from_dataset(dataset, labels_names)
+    categories_train = categories_from_label_set(labels, true_classes)
+
+    for nth_cross_validation in range(nb_cross_validations):
+        fold = 0
+
+        for train_index, validation_index in KFold(n_splits=k, shuffle=True).split(images, true_classes):
+            X_train, X_validation = images[train_index], images[validation_index]
+            y_train, y_validation = [true_classes[train_index], categories_train[train_index]], \
+                                    [true_classes[validation_index], categories_train[validation_index]]
+            Y_train = [
+                to_categorical(y_train[0], num_classes=len(labels_names)),
+                to_categorical(y_train[1], num_classes=len(categories)),
+            ]
+            Y_validation = [
+                to_categorical(y_validation[0], num_classes=len(labels_names)),
+                to_categorical(y_validation[1], num_classes=len(categories)),
+            ]
+            fold_size = len(y_train[0])
+
+            # create data generators
+            train_datagen = ImageMultiOutputSequence(
+                X_train, Y_train, ['label', 'category'], batch_size=32, augmentations=AUGMENTATIONS
+            )
+            validation_datagen = ImageMultiOutputSequence(
+                X_validation, Y_validation, ['label', 'category'], batch_size=32, augmentations=VALIDATION_AUGMENTATIONS
+            )
+            class_weights = None  # class weights cannot be used with multi output model
+
+            print(f"\nValidation {nth_cross_validation + 1}, fold {fold + 1} :\n---------------------------\n")
+
+            # clone given model without keeping the layers weights
+            current_model = clone_model(model)
+
+            # Specify optimizer and loss function
+            current_model.compile(optimizer='adam', loss={
+                'label': categorical_focal_loss([[.25] * len(labels_names)]),
+                'category': categorical_focal_loss([[.25] * len(categories)])
+            }, metrics={
+                'label': 'accuracy',
+                'category': 'accuracy'
+            })
+
+            history, trained_model = train_model(
+                model=current_model,
+                train_datagen=train_datagen,
+                validation_datagen=validation_datagen,
+                class_weights=class_weights,
+                epochs=epochs,
+                steps_per_epoch=fold_size / 32,
+                early_stopping=early_stopping,
+                model_checkpoint_cb=model_checkpoint_cb,
+                categories=categories
+            )
+
+            conf_matrix, accuracy, loss = evaluate_multi_output_model(trained_model, X_validation, Y_validation, y_validation)
             histories.append(history)
             total_conf_matrix += conf_matrix
             mean_accuracy += accuracy * fold_size / (len(dataset) * nb_cross_validations)
