@@ -3,11 +3,7 @@ import shapely.geometry
 import rasterio.mask
 import numpy as np
 import geojson
-import os
-
-DATA_ROOT_PATH = '../data/'
-DATASET_IMAGES_PATH = DATA_ROOT_PATH + 'datasets/images/'
-RASTER_CHUNKS_PATH = DATA_ROOT_PATH + 'raster_chunks/'
+from config import *
 
 
 def image_around_coordinates(raster, coordinates, nb_pixel_around):

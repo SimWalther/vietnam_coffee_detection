@@ -3,8 +3,8 @@ import rasterio
 import rasterio.merge
 import rasterio.plot
 import time
+from config import *
 
-ROOT_PATH = "../data/"
 
 FOLDER_NAMES = [
     "Vietnam_2019_whole_year_collection2"
@@ -17,7 +17,7 @@ def open_raster_files(folder_path):
     :param folder_path: the folder path
     :return: files opened by rasterio
     """
-    raster_paths = glob.glob(ROOT_PATH + folder_path + "/*.tif")
+    raster_paths = glob.glob(os.path.join(DATA_ROOT_PATH, folder_path, "*.tif"))
     return list(map(rasterio.open, raster_paths))
 
 
@@ -40,7 +40,7 @@ for folder_name in FOLDER_NAMES:
     print("Writing merged raster to disk...")
 
     # Write merged raster to disk
-    with rasterio.open(ROOT_PATH + folder_name + '/merged.tif', "w", **metadata) as dest:
+    with rasterio.open(os.path.join(DATA_ROOT_PATH, folder_name, '/merged.tif'), "w", **metadata) as dest:
         dest.write(merged_result)
 
     print("Finished writing to disk")

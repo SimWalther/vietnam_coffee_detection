@@ -9,7 +9,7 @@ from shapely import wkt
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-import os
+from config import *
 import spacv
 from tifffile.tifffile import imread
 from rasterio.plot import reshape_as_image
@@ -23,11 +23,6 @@ from albumentations import (
     VerticalFlip,
     RandomRotate90,
 )
-
-DATA_ROOT_PATH = '../data/'
-MODEL_PATH = '../models/'
-DATASET_PATH = DATA_ROOT_PATH + 'datasets/'
-DISTRICTS_PATH = DATA_ROOT_PATH + "districts/diaphantinh.geojson"
 
 AUGMENTATIONS = Compose([
     HorizontalFlip(p=0.5),
@@ -154,7 +149,11 @@ class Metrics(Callback):
 
 def elements_inside_data_generator(datagen):
     images = []
-    true_classes = []
+
+    if isinstance(datagen.__getitem__(0)[1], dict):
+        true_classes = {output_name: [] for output_name in datagen.__getitem__(0)[1].keys()}
+    else:
+        true_classes = []
 
     for i in range(len(datagen)):
         images.extend(datagen.__getitem__(i)[0])
@@ -207,11 +206,8 @@ def train_model(model, train_datagen, validation_datagen, class_weights, epochs,
 
     callbacks = []
 
-    if validation_datagen is not None:
+    if (not isinstance(train_datagen, ImageMultiOutputSequence)) and (not isinstance(validation_datagen, ImageMultiOutputSequence)):
         callbacks.append(Metrics(train_datagen=train_datagen, validation_datagen=validation_datagen))
-    else:
-        assert not early_stopping, "early stopping cannot be used without validation data"
-        assert not model_checkpoint_cb, "model checkpoint callback cannot be used without validation data"
 
     if early_stopping:
         callbacks.append(EarlyStopping(monitor='f1_score_val', patience=100, mode="max"))
@@ -307,7 +303,7 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
     if with_model_checkpoint:
         # Model checkpoint callback should be created here to avoid resetting the 'best' property of the model checkpoint.
         # By doing so, we ensure that model checkpoint is the best across all cross validations.
-        model_file = MODEL_PATH + model_name + ".hdf5"
+        model_file = os.path.join(MODEL_ROOT_PATH, model_name + ".hdf5")
         model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True, mode='max')
 
     images = images_from_dataset(dataset, bands)
@@ -391,7 +387,7 @@ def cross_validation_from_csv_files(model, other_filename, test_filename, bands,
     if with_model_checkpoint:
         # Model checkpoint callback should be created here to avoid resetting the 'best' property of the model checkpoint.
         # By doing so, we ensure that model checkpoint is the best across all cross validations.
-        model_file = MODEL_PATH + model_name + ".hdf5"
+        model_file = os.path.join(MODEL_ROOT_PATH, model_name + ".hdf5")
         model_checkpoint_cb = ModelCheckpoint(model_file, monitor='f1_score_val', verbose=0, save_best_only=True,
                                               mode='max')
 

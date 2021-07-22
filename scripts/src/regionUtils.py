@@ -1,22 +1,18 @@
 import geopandas as gpd
 import shapely.geometry
 import glob
+from config import *
 from labelsUtils import labels_coordinates_from_files
 
-DATA_ROOT_PATH = '../data/'
-DISTRICTS_PATH = DATA_ROOT_PATH + "districts/diaphantinh.geojson"
-SOILMAP_PATH = DATA_ROOT_PATH + "soilmap/soilmap.geojson"
-SHAPEFILE_ROOT_PATH = DATA_ROOT_PATH + 'labels/'
-
-CENTRAL_HIGHLANDS_SHP_PATHS = glob.glob(SHAPEFILE_ROOT_PATH + 'central_highlands_*/*.shp')
-SUMATRA_SOUTH_SHP_PATH = SHAPEFILE_ROOT_PATH + 'sumatra_south/sumatra_south.shp'
-SUMATRA_CENTER_SHP_PATH = SHAPEFILE_ROOT_PATH + 'sumatra_center/sumatra_center.shp'
-SULAWESI_SHP_PATH = SHAPEFILE_ROOT_PATH + 'sulawesi/sulawesi.shp'
-PARA_NORTH_SHP_PATH = SHAPEFILE_ROOT_PATH + 'para_north/para_north.shp'
-PARA_CENTER_SHP_PATH = SHAPEFILE_ROOT_PATH + 'para_center/para_center.shp'
-OCOTOPEQUE_SHP_PATH = SHAPEFILE_ROOT_PATH + 'ocotopeque/ocotopeque.shp'
-GHANA_SHP_PATH = SHAPEFILE_ROOT_PATH + 'ghana/ghana.shp'
-BORNEO_SHP_PATH = SHAPEFILE_ROOT_PATH + 'borneo/borneo.shp'
+CENTRAL_HIGHLANDS_SHP_PATHS = glob.glob(os.path.join(SHAPEFILE_ROOT_PATH, 'central_highlands_*/*.shp'))
+SUMATRA_SOUTH_SHP_PATH = os.path.join(SHAPEFILE_ROOT_PATH, 'sumatra_south/sumatra_south.shp')
+SUMATRA_CENTER_SHP_PATH = os.path.join(SHAPEFILE_ROOT_PATH, 'sumatra_center/sumatra_center.shp')
+SULAWESI_SHP_PATH = os.path.join(SHAPEFILE_ROOT_PATH, 'sulawesi/sulawesi.shp')
+PARA_NORTH_SHP_PATH = os.path.join(SHAPEFILE_ROOT_PATH, 'para_north/para_north.shp')
+PARA_CENTER_SHP_PATH = os.path.join(SHAPEFILE_ROOT_PATH, 'para_center/para_center.shp')
+OCOTOPEQUE_SHP_PATH = os.path.join(SHAPEFILE_ROOT_PATH, 'ocotopeque/ocotopeque.shp')
+GHANA_SHP_PATH = os.path.join(SHAPEFILE_ROOT_PATH, 'ghana/ghana.shp')
+BORNEO_SHP_PATH = os.path.join(SHAPEFILE_ROOT_PATH, 'borneo/borneo.shp')
 
 HIGHLAND_DISTRICTS = [
     'Dak Nong',
