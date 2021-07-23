@@ -277,7 +277,7 @@ def evaluate_model(model, X_test, Y_test, y_test, nb_labels):
     return conf_matrix, accuracy, loss
 
 
-def evaluate_multi_output_model(model, X_test, Y_test, y_test):
+def evaluate_multi_output_model(model, X_test, Y_test, y_test, outputs_sizes):
     # Evaluate model
     score = model.evaluate(X_test, Y_test, verbose=0)
     loss = score[0]
@@ -288,7 +288,7 @@ def evaluate_multi_output_model(model, X_test, Y_test, y_test):
     pred = [np.argmax(pred[i], axis=-1) for i in range(len(pred))]
 
     # Confusion matrix
-    conf_matrices = [me.confusion_matrix(y_test[i], pred[i], labels=np.unique(y_test[i])) for i in range(len(pred))]
+    conf_matrices = [me.confusion_matrix(y_test[i], pred[i], labels=np.arange(outputs_sizes[i])) for i in range(len(pred))]
 
     return conf_matrices, accuracy, loss
 
@@ -414,7 +414,6 @@ def cross_validation_multi_output_model(model, dataset, bands, labels, epochs, n
     """
 
     labels_names = [label.name for label in labels]
-    nb_labels = len(labels_names)
     histories = []
     mean_loss = 0
     mean_accuracy = 0
@@ -436,6 +435,7 @@ def cross_validation_multi_output_model(model, dataset, bands, labels, epochs, n
     images = images_from_dataset(dataset, bands)
     true_classes = labels_from_dataset(dataset, labels_names)
     categories_train = categories_from_label_set(labels, true_classes)
+    output_sizes = [len(labels_names), len(categories)]
 
     for nth_cross_validation in range(nb_cross_validations):
         fold = 0
@@ -489,7 +489,7 @@ def cross_validation_multi_output_model(model, dataset, bands, labels, epochs, n
                 categories=categories
             )
 
-            conf_matrices, accuracy, loss = evaluate_multi_output_model(trained_model, X_validation, Y_validation, y_validation)
+            conf_matrices, accuracy, loss = evaluate_multi_output_model(trained_model, X_validation, Y_validation, y_validation, output_sizes)
             histories.append(history)
 
             for i, conf_matrix in enumerate(conf_matrices):
