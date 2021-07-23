@@ -418,7 +418,7 @@ def cross_validation_multi_output_model(model, dataset, bands, labels, epochs, n
     histories = []
     mean_loss = 0
     mean_accuracy = 0
-    total_conf_matrix = np.zeros((len(labels_names), len(labels_names)))
+    total_conf_matrices = [np.zeros((len(labels_names), len(labels_names))), np.zeros((len(categories), len(categories)))]
 
     model.summary()
 
@@ -489,15 +489,18 @@ def cross_validation_multi_output_model(model, dataset, bands, labels, epochs, n
                 categories=categories
             )
 
-            conf_matrix, accuracy, loss = evaluate_multi_output_model(trained_model, X_validation, Y_validation, y_validation)
+            conf_matrices, accuracy, loss = evaluate_multi_output_model(trained_model, X_validation, Y_validation, y_validation)
             histories.append(history)
-            total_conf_matrix += conf_matrix
+
+            for i, conf_matrix in enumerate(conf_matrices):
+                total_conf_matrices[i] += conf_matrix
+
             mean_accuracy += accuracy * fold_size / (len(dataset) * nb_cross_validations)
             mean_loss += loss * fold_size / (len(dataset) * nb_cross_validations)
 
             fold += 1
 
-    return mean_loss, mean_accuracy, histories, total_conf_matrix
+    return mean_loss, mean_accuracy, histories, total_conf_matrices
 
 
 def cross_validation_from_csv_files(model, other_filename, test_filename, bands, labels, epochs,
