@@ -190,6 +190,11 @@ def labels_coordinates_from_files(shapefiles_paths, boundaries):
 
 
 def category_from_label(label):
+    """
+    Get the category of a given label
+    :param label: the label
+    :return: the category
+    """
     for labelCategory in LabelCategory:
         if label in CATEGORIES_LABELS[labelCategory]:
             return labelCategory
@@ -197,9 +202,15 @@ def category_from_label(label):
     return None
 
 
-def categories_from_label_set(labels, label_set):
+def categories_from_label_set(labels, images_labels):
+    """
+    Get the categories for a label set
+    :param labels: the labels used
+    :param images_labels: labels for each images
+    :return: the categories for each images
+    """
     return np.asarray([
-        category_from_label(labels[label]).value for label in label_set
+        category_from_label(labels[label]).value for label in images_labels
     ])
 
 

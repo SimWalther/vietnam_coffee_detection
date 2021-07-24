@@ -59,6 +59,10 @@ def shapes_from_geojson(file, names, name_column='Name', geometry_column='geomet
 
 
 def sumatra_south_labels_coordinates():
+    """
+    Get labels coordinates of Sumatra south
+    :return: labels coordinates
+    """
     return labels_coordinates_from_files(
         [SUMATRA_SOUTH_SHP_PATH],
         shapely.geometry.box(103.335512, -3.659900, 105.97766784, -5.96634052)
@@ -66,6 +70,10 @@ def sumatra_south_labels_coordinates():
 
 
 def sumatra_center_labels_coordinates():
+    """
+    Get labels coordinates of Sumatra center
+    :return: labels coordinates
+    """
     return labels_coordinates_from_files(
         [SUMATRA_CENTER_SHP_PATH],
         shapely.geometry.box(100.9018, 0.8373, 102.2407, -0.6134)
@@ -73,6 +81,10 @@ def sumatra_center_labels_coordinates():
 
 
 def sulawesi_labels_coordinates():
+    """
+    Get labels coordinates of Sulawesi
+    :return: labels coordinates
+    """
     return labels_coordinates_from_files(
         [SULAWESI_SHP_PATH],
         shapely.geometry.box(118.6873, 1.3155, 123.137, -5.573)
@@ -80,6 +92,10 @@ def sulawesi_labels_coordinates():
 
 
 def para_north_labels_coordinates():
+    """
+    Get labels coordinates of Para north
+    :return: labels coordinates
+    """
     return labels_coordinates_from_files(
         [PARA_NORTH_SHP_PATH],
         shapely.geometry.box(-55.0466, -2.6253, -52.5674, -4.4163)
@@ -87,6 +103,10 @@ def para_north_labels_coordinates():
 
 
 def para_center_labels_coordinates():
+    """
+    Get labels coordinates of Para center
+    :return: labels coordinates
+    """
     return labels_coordinates_from_files(
         [PARA_CENTER_SHP_PATH],
         shapely.geometry.box(-53.4912, -5.4250, -50.9320, -7.1264)
@@ -94,6 +114,10 @@ def para_center_labels_coordinates():
 
 
 def ocotopeque_labels_coordinates():
+    """
+    Get labels coordinates of Ocotopeque
+    :return: labels coordinates
+    """
     return labels_coordinates_from_files(
         [OCOTOPEQUE_SHP_PATH],
         shapely.geometry.box(-89.4848, 15.5488, -87.2884, 13.9015)
@@ -101,6 +125,10 @@ def ocotopeque_labels_coordinates():
 
 
 def ghana_labels_coordinates():
+    """
+    Get labels coordinates of Ghana
+    :return: labels coordinates
+    """
     return labels_coordinates_from_files(
         [GHANA_SHP_PATH],
         shapely.geometry.box(-2.5215, 7.0745, -1.8946, 6.2379)
@@ -108,6 +136,10 @@ def ghana_labels_coordinates():
 
 
 def borneo_labels_coordinates():
+    """
+    Get labels coordinates of Borneo
+    :return: labels coordinates
+    """
     return labels_coordinates_from_files(
         [BORNEO_SHP_PATH],
         shapely.geometry.box(112.16164, -2.29216, 112.52132, -2.56859)

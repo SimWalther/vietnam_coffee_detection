@@ -171,6 +171,11 @@ class Metrics(Callback):
 
 
 def elements_inside_data_generator(datagen):
+    """
+    Extract all images and true classes from a data generator
+    :param datagen: the data generator
+    :return: images and true classes
+    """
     images = []
 
     if isinstance(datagen.__getitem__(0)[1], dict):
@@ -221,10 +226,9 @@ def k_fold_indices(dataset, k=5):
 
 
 def train_model(model, train_datagen, validation_datagen, class_weights, epochs, steps_per_epoch,
-                early_stopping=False, model_checkpoint_cb=None, categories=None):
+                early_stopping=False, model_checkpoint_cb=None):
     """
     Train a Keras neural network model
-    :param categories: categories used
     :param model_checkpoint_cb: the checkpoint callback
     :param model: the Keras neural network model
     :param train_datagen train data generator
@@ -262,6 +266,16 @@ def train_model(model, train_datagen, validation_datagen, class_weights, epochs,
 
 
 def evaluate_model(model, X_test, Y_test, y_test, nb_labels):
+    """
+    Evaluate a given model and compute a confusion matrix
+    :param model: the model
+    :param X_test: images set
+    :param Y_test: true labels set
+    :param y_test: true labels as one hot encoding set
+    :param nb_labels: the number of labels
+    :return: confusion matrix, accuracy and loss
+    """
+
     # Evaluate model
     score = model.evaluate(X_test, Y_test, verbose=0)
     loss = score[0]
@@ -278,6 +292,16 @@ def evaluate_model(model, X_test, Y_test, y_test, nb_labels):
 
 
 def evaluate_multi_output_model(model, X_test, Y_test, y_test, outputs_sizes):
+    """
+    Evaluate multi output model and compute confusion matrices for each output
+    :param model: the model
+    :param X_test: images set
+    :param Y_test: true labels set
+    :param y_test: true labels as one hot encoding set
+    :param outputs_sizes: the sizes of each output of the model
+    :return: confusion matrices, accuracy and loss
+    """
+
     # Evaluate model
     score = model.evaluate(X_test, Y_test, verbose=0)
     loss = score[0]
@@ -294,7 +318,11 @@ def evaluate_multi_output_model(model, X_test, Y_test, y_test, outputs_sizes):
 
 
 def compute_class_weights(y_train):
-    # Compute each classes weight
+    """
+    Compute each class weight
+    :param y_train: the true label set
+    :return: dictionary of class weight
+    """
     class_weights = class_weight.compute_class_weight(
         class_weight='balanced',
         classes=np.unique(y_train),
@@ -486,7 +514,6 @@ def cross_validation_multi_output_model(model, dataset, bands, labels, epochs, n
                 steps_per_epoch=fold_size / 32,
                 early_stopping=early_stopping,
                 model_checkpoint_cb=model_checkpoint_cb,
-                categories=categories
             )
 
             conf_matrices, accuracy, loss = evaluate_multi_output_model(trained_model, X_validation, Y_validation, y_validation, output_sizes)
@@ -503,9 +530,23 @@ def cross_validation_multi_output_model(model, dataset, bands, labels, epochs, n
     return mean_loss, mean_accuracy, histories, total_conf_matrices
 
 
-def cross_validation_from_csv_files(model, other_filename, test_filename, bands, labels, epochs,
-                                    nb_cross_validations=1, early_stopping=False, with_model_checkpoint=False,
-                                    model_name="model"):
+def spatial_cross_validation_from_csv_files(model, other_filename, test_filename, bands, labels, epochs,
+                                            nb_cross_validations=1, early_stopping=False, with_model_checkpoint=False,
+                                            model_name="model"):
+    """
+    Cross validation by using
+    :param model:
+    :param other_filename:
+    :param test_filename:
+    :param bands:
+    :param labels:
+    :param epochs:
+    :param nb_cross_validations:
+    :param early_stopping:
+    :param with_model_checkpoint:
+    :param model_name:
+    :return:
+    """
     labels_names = [label.name for label in labels]
     nb_labels = len(labels_names)
     histories = []
@@ -682,6 +723,14 @@ def cross_validation_with_metrics_evolution(model, dataset, bands, labels, epoch
 
 
 def prepare_image(image, bands):
+    """
+    Prepare images by filtering bands, opening files and reshaping files as images
+    i.e. (bands, rows, columns) to (rows, columns, bands)
+    :param image: the image to prepare
+    :param bands: bands to keep
+    :return: prepared image
+    """
+
     # if this is a string we assume it's a path the image
     # otherwise we process image as rasters
     if isinstance(image, str):
@@ -714,6 +763,13 @@ def labels_from_dataset(dataset, labels_names):
 
 
 def spatial_separation_dataset(geo_df, labels):
+    """
+    Separate dataset into folds by taking groups, separated by at least one km, of two folds for each classes.
+    Code inspired by Romain Capocasale spatial separation, available at https://github.com/RomainCapo/IADeforestation/
+    :param geo_df: a dataframe with georeferenced points
+    :param labels: the labels
+    :return: yield selected fold and other folds
+    """
     labels_names = [label.name for label in labels]
 
     nb_fold = 10
@@ -764,8 +820,15 @@ def spatial_separation_dataset(geo_df, labels):
         yield selected, other
 
 
-# find all raster files in the folder and create a dataset with them
 def predict_on_raster(trained_model, raster_path, bands, square_size=9):
+    """
+    Use a trained model to predict raster land cover.
+    :param trained_model: the trained model
+    :param raster_path: the path the the raster
+    :param bands: bands used
+    :param square_size: the size of images to predict. Currently also used as a step size.
+    :return: the predictions and their image indices (row, col)
+    """
     predictions = []
     image_indices = []
 
@@ -784,6 +847,14 @@ def predict_on_raster(trained_model, raster_path, bands, square_size=9):
 
 
 def predict_label_category_on_raster(trained_model, raster_path, bands, square_size=9):
+    """
+    Predict label and category on a given raster.
+    :param trained_model: the trained model
+    :param raster_path: the path to the raster
+    :param bands: bands to use
+    :param square_size: the size of images to predict. Currently also used as a step size.
+    :return: the labels and category predictions and their image indices (row, col)
+    """
     label_predictions = []
     category_predictions = []
     image_indices = []

@@ -84,8 +84,15 @@ def plot_confusion_matrix(confmatrix, labels_names, ax=None):
 
 
 def label_first_detections(raster_path, dataframe, label_index, label_coordinates, image_size=9):
-    row_col_coffee_labels = []
-
+    """
+    Find a specific label first detection at a given coor
+    :param raster_path:
+    :param dataframe:
+    :param label_index:
+    :param label_coordinates:
+    :param image_size:
+    :return:
+    """
     with rasterio.open(raster_path) as raster:
         row_col_coffee_labels = [
             find_image_row_col_label_coordinate(raster, coord[0], coord[1], image_size) for coord in label_coordinates
@@ -103,5 +110,13 @@ def label_first_detections(raster_path, dataframe, label_index, label_coordinate
 
 
 def find_image_row_col_label_coordinate(raster, lat, lon, image_size):
+    """
+    Find image row col from its coordinates
+    :param raster: the raster from which the image has been taken
+    :param lat: latitude
+    :param lon: longitude
+    :param image_size: the image size. Currently acts as step size too
+    :return: the image row col
+    """
     row, col = raster.index(lat, lon, precision=23)
     return round(row / image_size), round(col / image_size)

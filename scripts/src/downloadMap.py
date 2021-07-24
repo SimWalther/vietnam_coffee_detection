@@ -21,6 +21,7 @@ ee.Initialize()
 # pixel_qa Pixel quality attributes generated from the CFMASK algorithm.
 
 # Landsat 8 collection 2
+# See : https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2
 SATELLITE_DATASET = "LANDSAT/LC08/C02/T1_L2"
 # SR_B1 		1 	65455 	2.75e-05 	-0.2 	0.435-0.451 μm  Band 1 (ultra blue, coastal aerosol) surface reflectance
 # SR_B2 		1 	65455 	2.75e-05 	-0.2 	0.452-0.512 μm  Band 2 (blue) surface reflectance
@@ -200,81 +201,7 @@ def image_collection_to_median_img(image_collection, country_name='Vietnam'):
     return image_collection
 
 
-# -------------------------- DRY SEASON
-# image_collection_2014 = create_image_collection('2014-11-01', '2015-05-01')
-# image_collection_2015 = create_image_collection('2015-11-01', '2016-05-01')
-# image_collection_2016 = create_image_collection('2016-11-01', '2017-05-01')
-# image_collection_2017 = create_image_collection('2017-11-01', '2018-05-01')
-# image_collection_2018 = create_image_collection('2018-11-01', '2019-05-01')
-
-# -------------------------- WET SEASON
-# image_collection_2014 = create_image_collection('2014-05-01', '2014-10-01')
-# image_collection_2015 = create_image_collection('2015-05-01', '2015-10-01')
-# image_collection_2016 = create_image_collection('2016-05-01', '2016-10-01')
-# image_collection_2017 = create_image_collection('2017-05-01', '2017-10-01')
-# image_collection_2018 = create_image_collection('2018-05-01', '2018-10-01')
-
-# -------------------------- 2 MONTHS
-# image_collection_2014 = create_image_collection('2014-01-01', '2014-03-01')
-# image_collection_2015 = create_image_collection('2015-01-01', '2015-03-01')
-# image_collection_2016 = create_image_collection('2016-01-01', '2016-03-01')
-# image_collection_2017 = create_image_collection('2017-01-01', '2017-03-01')
-# image_collection_2018 = create_image_collection('2018-01-01', '2018-03-01')
-# image_collection_2019 = create_image_collection('2019-01-01', '2019-03-01')
-# image_collection_2020 = create_image_collection('2020-01-01', '2020-03-01')
-
-# image_collection_2014 = create_image_collection('2014-03-01', '2014-05-01')
-# image_collection_2015 = create_image_collection('2015-03-01', '2015-05-01')
-# image_collection_2016 = create_image_collection('2016-03-01', '2016-05-01')
-# image_collection_2017 = create_image_collection('2017-03-01', '2017-05-01')
-# image_collection_2018 = create_image_collection('2018-03-01', '2018-05-01')
-# image_collection_2019 = create_image_collection('2019-03-01', '2019-05-01')
-# image_collection_2020 = create_image_collection('2020-03-01', '2020-05-01')
-#
-# image_collection_2014 = create_image_collection('2014-05-01', '2014-07-01')
-# image_collection_2015 = create_image_collection('2015-05-01', '2015-07-01')
-# image_collection_2016 = create_image_collection('2016-05-01', '2016-07-01')
-# image_collection_2017 = create_image_collection('2017-05-01', '2017-07-01')
-# image_collection_2018 = create_image_collection('2018-05-01', '2018-07-01')
-# image_collection_2019 = create_image_collection('2019-05-01', '2019-07-01')
-# image_collection_2020 = create_image_collection('2020-05-01', '2020-07-01')
-#
-# image_collection_2014 = create_image_collection('2014-07-01', '2014-09-01')
-# image_collection_2015 = create_image_collection('2015-07-01', '2015-09-01')
-# image_collection_2016 = create_image_collection('2016-07-01', '2016-09-01')
-# image_collection_2017 = create_image_collection('2017-07-01', '2017-09-01')
-# image_collection_2018 = create_image_collection('2018-07-01', '2018-09-01')
-# image_collection_2019 = create_image_collection('2019-07-01', '2019-09-01')
-# image_collection_2020 = create_image_collection('2020-07-01', '2020-09-01')
-#
-# image_collection_2014 = create_image_collection('2014-09-01', '2014-11-01')
-# image_collection_2015 = create_image_collection('2015-09-01', '2015-11-01')
-# image_collection_2016 = create_image_collection('2016-09-01', '2016-11-01')
-# image_collection_2017 = create_image_collection('2017-09-01', '2017-11-01')
-# image_collection_2018 = create_image_collection('2018-09-01', '2018-11-01')
-# image_collection_2019 = create_image_collection('2019-09-01', '2019-11-01')
-# image_collection_2020 = create_image_collection('2020-09-01', '2020-11-01')
-#
-# image_collection_2014 = create_image_collection('2014-11-01', '2015-01-01')
-# image_collection_2015 = create_image_collection('2015-11-01', '2016-01-01')
-# image_collection_2016 = create_image_collection('2016-11-01', '2017-01-01')
-# image_collection_2017 = create_image_collection('2017-11-01', '2018-01-01')
-# image_collection_2018 = create_image_collection('2018-11-01', '2019-01-01')
-# image_collection_2019 = create_image_collection('2019-11-01', '2020-01-01')
-# image_collection_2020 = create_image_collection('2020-11-01', '2021-01-01')
-
-# -------------------------- 2014 - 2020
-# image_collection = create_image_collection('2014-01-01', '2021-01-01')
-
-# -------------------------- January to April, 2017
-# image_collection = create_image_collection('2017-01-01', '2017-05-01')
-
-# -------------------------- January to February, 2017
-# image_collection = create_image_collection('2017-01-01', '2017-03-01')
-
-# -------------------------- March to April, 2017
-# image_collection = create_image_collection('2017-03-01', '2017-05-01')
-
+# If there is multiple image collections to reduce into one image, do it as follow :
 # merged_image_collections = image_collection_2014 \
 #     .merge(image_collection_2015) \
 #     .merge(image_collection_2016) \
@@ -283,6 +210,7 @@ def image_collection_to_median_img(image_collection, country_name='Vietnam'):
 #     .merge(image_collection_2019) \
 #     .merge(image_collection_2020)
 
+# Exemple : Whole year, 2019
 image_collection = create_image_collection('2019-01-01', '2020-01-01')
 
 median_img = image_collection_to_median_img(image_collection, "Vietnam")

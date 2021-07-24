@@ -107,6 +107,13 @@ def labels_values_from_raster_files(labels, raster_paths, labels_coordinates_lis
 
 
 def create_image_metadata(out_img, out_transform, original_raster):
+    """
+    Create image metadata by taking raster metadata as a basis and updating them.
+    :param out_img: the raster image
+    :param out_transform: the raster affine transform
+    :param original_raster: the original raster
+    :return: created metadata
+    """
     metadata = original_raster.meta.copy()
     metadata.update({
         "driver": "GTiff",
@@ -178,6 +185,13 @@ def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list
 
 
 def square_chunks(raster_path, square_size, batch_size=32):
+    """
+    Split raster into chunks of a specified size
+    :param raster_path: the raster path
+    :param square_size:
+    :param batch_size:
+    :return:
+    """
     with rasterio.open(raster_path) as raster:
         width = raster.shape[0]
         height = raster.shape[1]
