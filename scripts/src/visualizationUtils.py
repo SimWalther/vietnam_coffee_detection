@@ -22,15 +22,15 @@ def draw_bands_boxplots(df, hue, title):
 
 def display_cross_val_map_class(fold_sets, map_shape, title, legends=["Other", "Test"], xlim=[106,110], ylim=[10, 16], figsize=(12, 6)):
     """
-    code adapted from Romain Capocasale Master thesis display_cross_val_map_class
-    :param fold_sets:
-    :param map_shape:
-    :param title:
-    :param legends:
-    :param xlim:
-    :param ylim:
-    :param figsize:
-    :return:
+    code adapted from Romain Capocasale Master thesis display_cross_val_map_class.
+    His code is available at : https://github.com/RomainCapo/IADeforestation/
+    :param fold_sets: folds sets to plot
+    :param map_shape: background shape to plot
+    :param title: title of the figure
+    :param legends: legends of the figure
+    :param xlim: x axis limits
+    :param ylim: y axis limits
+    :param figsize: size of the figure to plot
     """
 
     fig, ax = pl.subplots(figsize=figsize)
