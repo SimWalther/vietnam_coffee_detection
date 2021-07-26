@@ -210,11 +210,11 @@ def image_collection_to_median_img(image_collection, country_name='Vietnam'):
 #     .merge(image_collection_2019) \
 #     .merge(image_collection_2020)
 
-# Exemple : Whole year, 2019
-image_collection = create_image_collection('2019-01-01', '2020-01-01')
+# Exemple : Whole year, 2014
+image_collection = create_image_collection('2014-01-01', '2015-01-01')
 
 median_img = image_collection_to_median_img(image_collection, "Vietnam")
-export_task = create_export_task(median_img, 'Vietnam_2019_whole_year_collection2')
+export_task = create_export_task(median_img, 'Vietnam_2014_whole_year_collection2')
 
 # Start the task
 start_task(export_task)

@@ -74,6 +74,7 @@ def plot_confusion_matrix(confmatrix, labels_names, ax=None):
                         horizontalalignment='center',
                         verticalalignment='center',
                         fontsize=8)
+
     ax.set_xticks(np.arange(confmatrix.shape[0]))
     ax.set_xticklabels([labels_names[label] for label in range(confmatrix.shape[0])], rotation='vertical')
     ax.set_yticks(np.arange(confmatrix.shape[1]))

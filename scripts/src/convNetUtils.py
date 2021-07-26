@@ -241,9 +241,7 @@ def train_model(model, train_datagen, validation_datagen, class_weights, epochs,
     :return: the train history and the trained model
     """
 
-    callbacks = []
-
-    callbacks.append(Metrics(train_datagen=train_datagen, validation_datagen=validation_datagen))
+    callbacks = [Metrics(train_datagen=train_datagen, validation_datagen=validation_datagen)]
 
     if early_stopping:
         callbacks.append(EarlyStopping(monitor='f1_score_val', patience=100, mode="max"))

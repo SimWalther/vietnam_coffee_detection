@@ -190,7 +190,7 @@ def square_chunks(raster_path, square_size, batch_size=32):
     :param raster_path: the raster path
     :param square_size:
     :param batch_size:
-    :return:
+    :return: batch of images and their images indices
     """
     with rasterio.open(raster_path) as raster:
         width = raster.shape[0]

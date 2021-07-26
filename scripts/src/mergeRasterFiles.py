@@ -7,7 +7,10 @@ from config import *
 
 
 FOLDER_NAMES = [
-    "Vietnam_2019_whole_year_collection2"
+    "Vietnam_2015_whole_year_collection2",
+    "Vietnam_2016_whole_year_collection2",
+    "Vietnam_2017_whole_year_collection2",
+    "Vietnam_2020_whole_year_collection2"
 ]
 
 
@@ -40,7 +43,7 @@ for folder_name in FOLDER_NAMES:
     print("Writing merged raster to disk...")
 
     # Write merged raster to disk
-    with rasterio.open(os.path.join(DATA_ROOT_PATH, folder_name, '/merged.tif'), "w", **metadata) as dest:
+    with rasterio.open(os.path.join(DATA_ROOT_PATH, folder_name, 'merged.tif'), "w", **metadata) as dest:
         dest.write(merged_result)
 
     print("Finished writing to disk")
