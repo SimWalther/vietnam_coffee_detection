@@ -4,6 +4,7 @@ import rasterio.mask
 import numpy as np
 import geojson
 from config import *
+import convNetUtils
 
 
 def image_around_coordinates(raster, coordinates, nb_pixel_around):
@@ -184,12 +185,13 @@ def make_dataset_from_raster_files(labels, raster_paths, labels_coordinates_list
     return values
 
 
-def square_chunks(raster_path, square_size, batch_size=32):
+def square_chunks(raster_path, bands, square_size, batch_size=32):
     """
     Split raster into chunks of a specified size
     :param raster_path: the raster path
-    :param square_size:
-    :param batch_size:
+    :param square_size: the size of images to predict. Currently also used as a step size.
+    :param batch_size: the batch size
+    :param bands: bands to filter
     :return: batch of images and their images indices
     """
     with rasterio.open(raster_path) as raster:
@@ -216,15 +218,18 @@ def square_chunks(raster_path, square_size, batch_size=32):
         for i in range(nb_images_row):
             for j in range(nb_images_col):
                 out_img, out_transform = image_square_at_px(i * square_size, j * square_size, square_size, raster)
+                image = convNetUtils.prepare_image(out_img, bands)
 
                 # Don't add if there is 'NaN' values
-                if not np.isnan(out_img).any():
-                    batch_images.append(out_img)
-                    batch_images_indices.append((i, j))
-                    img_count += 1
+                if np.isnan(image).any():
+                    continue
+
+                batch_images.append(image)
+                batch_images_indices.append((i, j))
+                img_count += 1
 
                 if img_count == batch_size:
-                    yield batch_images, batch_images_indices
+                    yield np.asarray(batch_images), batch_images_indices
                     # reset batch
                     batch_images = []
                     batch_images_indices = []
@@ -233,4 +238,4 @@ def square_chunks(raster_path, square_size, batch_size=32):
         # if there is a leftover of images (less remaining images than the batch size)
         # yield them
         if len(batch_images) > 0:
-            yield batch_images, batch_images_indices
+            yield np.asarray(batch_images), batch_images_indices

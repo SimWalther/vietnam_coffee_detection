@@ -7,10 +7,11 @@ from config import *
 
 
 FOLDER_NAMES = [
-    "Vietnam_2015_whole_year_collection2",
-    "Vietnam_2016_whole_year_collection2",
-    "Vietnam_2017_whole_year_collection2",
-    "Vietnam_2020_whole_year_collection2"
+    "Vietnam_2015_january_to_april_collection2",
+    "Vietnam_2016_january_to_april_collection2",
+    "Vietnam_2017_january_to_april_collection2",
+    "Vietnam_2020_january_to_april_collection2",
+    "Vietnam_2021_january_to_april_collection2"
 ]
 
 

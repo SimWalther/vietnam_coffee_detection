@@ -373,7 +373,8 @@ def cross_validation(model, dataset, bands, labels, epochs, nb_cross_validations
     for nth_cross_validation in range(nb_cross_validations):
         fold = 0
 
-        for train_index, validation_index in StratifiedKFold(n_splits=k, shuffle=True).split(images, true_classes):
+        for train_index, validation_index in StratifiedKFold(n_splits=k, shuffle=True)\
+                .split(images, true_classes):
             X_train, X_validation = images[train_index], images[validation_index]
             y_train, y_validation = true_classes[train_index], true_classes[validation_index]
             Y_train = to_categorical(y_train, num_classes=len(labels_names))
@@ -742,6 +743,7 @@ def prepare_image(image, bands):
 def images_from_dataset(dataset, bands):
     """
     Extract images from dataset
+    :param bands: bands to keep
     :param dataset: the dataset
     :return: an images array
     """
@@ -830,12 +832,8 @@ def predict_on_raster(trained_model, raster_path, bands, square_size=9):
     predictions = []
     image_indices = []
 
-    for batch_images, batch_indices in square_chunks(raster_path, square_size):
-        images = np.asarray([
-            prepare_image(img, bands) for img in batch_images
-        ])
-
-        pred = trained_model.predict(images)
+    for batch_images, batch_indices in square_chunks(raster_path, bands, square_size):
+        pred = trained_model.predict_on_batch(batch_images)
         pred = np.argmax(pred, axis=-1)
 
         predictions.extend(pred)
@@ -857,12 +855,8 @@ def predict_label_category_on_raster(trained_model, raster_path, bands, square_s
     category_predictions = []
     image_indices = []
 
-    for batch_images, batch_indices in square_chunks(raster_path, square_size):
-        images = np.asarray([
-            prepare_image(img, bands) for img in batch_images
-        ])
-
-        pred = trained_model.predict(images)
+    for batch_images, batch_indices in square_chunks(raster_path, bands, square_size):
+        pred = trained_model.predict_on_batch(batch_images)
         label_pred = np.argmax(pred[0], axis=-1)
         category_pred = np.argmax(pred[1], axis=-1)
 
