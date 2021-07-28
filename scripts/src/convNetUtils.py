@@ -11,9 +11,9 @@ import pandas as pd
 import geopandas as gpd
 from config import *
 import spacv
+import rasterUtils
 from tifffile.tifffile import imread
 from rasterio.plot import reshape_as_image
-from rasterUtils import square_chunks
 from sklearn.model_selection import StratifiedKFold, KFold
 
 from labelsUtils import categories_from_label_set
@@ -832,7 +832,7 @@ def predict_on_raster(trained_model, raster_path, bands, square_size=9):
     predictions = []
     image_indices = []
 
-    for batch_images, batch_indices in square_chunks(raster_path, bands, square_size):
+    for batch_images, batch_indices in rasterUtils.square_chunks(raster_path, bands, square_size):
         pred = trained_model.predict_on_batch(batch_images)
         pred = np.argmax(pred, axis=-1)
 
@@ -855,7 +855,7 @@ def predict_label_category_on_raster(trained_model, raster_path, bands, square_s
     category_predictions = []
     image_indices = []
 
-    for batch_images, batch_indices in square_chunks(raster_path, bands, square_size):
+    for batch_images, batch_indices in rasterUtils.square_chunks(raster_path, bands, square_size):
         pred = trained_model.predict_on_batch(batch_images)
         label_pred = np.argmax(pred[0], axis=-1)
         category_pred = np.argmax(pred[1], axis=-1)
