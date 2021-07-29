@@ -29,7 +29,7 @@
      <config:config-item-map-named config:name="Tables">
       <config:config-item-map-entry config:name="Sheet1">
        <config:config-item config:name="CursorPositionX" config:type="int">1</config:config-item>
-       <config:config-item config:name="CursorPositionY" config:type="int">96</config:config-item>
+       <config:config-item config:name="CursorPositionY" config:type="int">12</config:config-item>
        <config:config-item config:name="HorizontalSplitMode" config:type="short">0</config:config-item>
        <config:config-item config:name="VerticalSplitMode" config:type="short">0</config:config-item>
        <config:config-item config:name="HorizontalSplitPosition" config:type="int">0</config:config-item>
@@ -38,7 +38,7 @@
        <config:config-item config:name="PositionLeft" config:type="int">0</config:config-item>
        <config:config-item config:name="PositionRight" config:type="int">0</config:config-item>
        <config:config-item config:name="PositionTop" config:type="int">0</config:config-item>
-       <config:config-item config:name="PositionBottom" config:type="int">69</config:config-item>
+       <config:config-item config:name="PositionBottom" config:type="int">78</config:config-item>
        <config:config-item config:name="ZoomType" config:type="short">0</config:config-item>
        <config:config-item config:name="ZoomValue" config:type="int">110</config:config-item>
        <config:config-item config:name="PageViewZoomValue" config:type="int">60</config:config-item>
@@ -84,7 +84,7 @@
    <config:config-item config:name="HasColumnRowHeaders" config:type="boolean">true</config:config-item>
    <config:config-item config:name="ShowNotes" config:type="boolean">true</config:config-item>
    <config:config-item config:name="HasSheetTabs" config:type="boolean">true</config:config-item>
-   <config:config-item config:name="PrinterSetup" config:type="base64Binary">rAH+/0VOVllfNzY0MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ1VQUzpFTlZZXzc2NDAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAzQAAAAAAAAAIAFZUAAAkbQAASm9iRGF0YSAxCnByaW50ZXI9RU5WWV83NjQwCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCmNvbGxhdGU9ZmFsc2UKbWFyZ2luZGFqdXN0bWVudD0wLDAsMCwwCmNvbG9yZGVwdGg9MjQKcHNsZXZlbD0wCnBkZmRldmljZT0xCmNvbG9yZGV2aWNlPTAKUFBEQ29udGV4RGF0YQpEdXBsZXg6Tm9uZQBQYWdlU2l6ZTpMZXR0ZXIASW5wdXRTbG90OkF1dG8AABIAQ09NUEFUX0RVUExFWF9NT0RFDwBEdXBsZXhNb2RlOjpPZmY=</config:config-item>
+   <config:config-item config:name="PrinterSetup" config:type="base64Binary">rAH+/0VOVllfNzY0MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ1VQUzpFTlZZXzc2NDAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAzQAAAAAAAAAIAFZUAAAkbQAASm9iRGF0YSAxCnByaW50ZXI9RU5WWV83NjQwCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCmNvbGxhdGU9ZmFsc2UKbWFyZ2luZGFqdXN0bWVudD0wLDAsMCwwCmNvbG9yZGVwdGg9MjQKcHNsZXZlbD0wCnBkZmRldmljZT0xCmNvbG9yZGV2aWNlPTAKUFBEQ29udGV4RGF0YQpJbnB1dFNsb3Q6QXV0bwBQYWdlU2l6ZTpMZXR0ZXIARHVwbGV4Ok5vbmUAABIAQ09NUEFUX0RVUExFWF9NT0RFDwBEdXBsZXhNb2RlOjpPZmY=</config:config-item>
    <config:config-item config:name="RasterResolutionX" config:type="int">1000</config:config-item>
    <config:config-item config:name="SyntaxStringRef" config:type="short">7</config:config-item>
    <config:config-item config:name="RasterIsVisible" config:type="boolean">false</config:config-item>
@@ -247,6 +247,7 @@
    <number:year/>
   </number:date-style>
   <style:style style:name="ce3" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N37"/>
+  <style:style style:name="ce2" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N37"/>
   <style:page-layout style:name="pm1">
    <style:page-layout-properties style:writing-mode="lr-tb"/>
    <style:header-style>
@@ -270,9 +271,15 @@
    </style:footer-style>
   </style:page-layout>
   <style:style style:name="T1" style:family="text">
-   <style:text-properties style:font-name="DejaVu Sans" fo:font-size="10pt" fo:font-weight="normal" style:text-underline-style="none" style:text-underline-color="font-color" style:text-line-through-type="none" fo:font-style="normal" style:text-outline="false" fo:text-shadow="none" style:text-line-through-mode="continuous" fo:language="fr" fo:country="CH" style:language-asian="zh" style:country-asian="CN" style:language-complex="hi" style:country-complex="IN" style:font-name-asian="Noto Sans CJK SC" style:font-name-complex="Noto Sans Devanagari" style:font-size-asian="10pt" style:font-size-complex="10pt" style:font-weight-asian="normal" style:font-weight-complex="normal" style:font-style-asian="normal" style:font-style-complex="normal" style:text-emphasize="none" style:font-relief="none" style:text-overline-style="none" style:text-overline-color="font-color"/>
+   <style:text-properties style:text-outline="false" style:text-line-through-style="none" style:text-line-through-type="none" style:font-name="DejaVu Sans" fo:font-size="10pt" fo:language="fr" fo:country="CH" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:text-underline-mode="continuous" style:text-overline-mode="continuous" style:text-line-through-mode="continuous" style:font-name-asian="Noto Sans CJK SC" style:font-size-asian="10pt" style:language-asian="zh" style:country-asian="CN" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-name-complex="Noto Sans Devanagari" style:font-size-complex="10pt" style:language-complex="hi" style:country-complex="IN" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-emphasize="none" style:font-relief="none" style:text-overline-style="none" style:text-overline-color="font-color"/>
   </style:style>
   <style:style style:name="T2" style:family="text">
+   <style:text-properties fo:color="#000000" loext:opacity="100%" style:font-name="JetBrains Mono" fo:font-size="10pt" fo:font-style="normal" fo:font-weight="normal" style:font-name-asian="JetBrains Mono" style:font-size-asian="10pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-name-complex="JetBrains Mono" style:font-size-complex="10pt" style:font-style-complex="normal" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="T3" style:family="text">
+   <style:text-properties style:font-name="DejaVu Sans" fo:font-size="10pt" fo:font-weight="normal" style:text-underline-style="none" style:text-underline-color="font-color" style:text-line-through-type="none" fo:font-style="normal" style:text-outline="false" fo:text-shadow="none" style:text-line-through-mode="continuous" fo:language="fr" fo:country="CH" style:language-asian="zh" style:country-asian="CN" style:language-complex="hi" style:country-complex="IN" style:font-name-asian="Noto Sans CJK SC" style:font-name-complex="Noto Sans Devanagari" style:font-size-asian="10pt" style:font-size-complex="10pt" style:font-weight-asian="normal" style:font-weight-complex="normal" style:font-style-asian="normal" style:font-style-complex="normal" style:text-emphasize="none" style:font-relief="none" style:text-overline-style="none" style:text-overline-color="font-color"/>
+  </style:style>
+  <style:style style:name="T4" style:family="text">
    <style:text-properties fo:color="#000000" style:font-name="JetBrains Mono" fo:font-size="10pt" fo:font-weight="normal" fo:font-style="normal" style:font-name-asian="JetBrains Mono" style:font-name-complex="JetBrains Mono" style:font-size-asian="10pt" style:font-size-complex="10pt" style:font-weight-asian="normal" style:font-weight-complex="normal" style:font-style-asian="normal" style:font-style-complex="normal"/>
   </style:style>
  </office:automatic-styles>
@@ -293,7 +300,7 @@
      <text:p><text:sheet-name>???</text:sheet-name><text:s/>(<text:title>???</text:title>)</text:p>
     </style:region-left>
     <style:region-right>
-     <text:p><text:date style:data-style-name="N2" text:date-value="2021-07-29">00.00.0000</text:date>, <text:time style:data-style-name="N2" text:time-value="13:27:35.994311197">00:00:00</text:time></text:p>
+     <text:p><text:date style:data-style-name="N2" text:date-value="2021-07-29">00.00.0000</text:date>, <text:time style:data-style-name="N2" text:time-value="14:58:56.257678354">00:00:00</text:time></text:p>
     </style:region-right>
    </style:header>
    <style:header-left style:display="false"/>
@@ -307,7 +314,7 @@
   <office:spreadsheet>
    <table:calculation-settings table:automatic-find-labels="false" table:use-regular-expressions="false" table:use-wildcards="true"/>
    <table:table table:name="Sheet1" table:style-name="ta1">
-    <table:table-column table:style-name="co1" table:default-cell-style-name="ce3"/>
+    <table:table-column table:style-name="co1" table:default-cell-style-name="ce2"/>
     <table:table-column table:style-name="co2" table:default-cell-style-name="Default"/>
     <table:table-column table:style-name="co3" table:default-cell-style-name="Default"/>
     <table:table-row table:style-name="ro1">
@@ -330,7 +337,7 @@
     </table:table-row>
     <table:table-row table:style-name="ro2">
      <table:table-cell table:style-name="Default"/>
-     <table:table-cell office:value-type="string" calcext:value-type="string"><text:p>Regarder des informations sur Landsat8,</text:p><text:p>Suivre le tutoriel d’installation de l’API python de GEE et </text:p><text:p>Faire quelques essais de script pour interagir avec GEE.</text:p><text:p><text:span text:style-name="T1">Lire de la documentation QGIS</text:span></text:p><text:p><text:span text:style-name="T1">Recherche d’informations sur les différentes bandes de fréquences</text:span></text:p>
+     <table:table-cell office:value-type="string" calcext:value-type="string"><text:p>Regarder des informations sur Landsat8,</text:p><text:p>Suivre le tutoriel d’installation de l’API python de GEE et </text:p><text:p>Faire quelques essais de script pour interagir avec GEE.</text:p><text:p><text:span text:style-name="T3">Lire de la documentation QGIS</text:span></text:p><text:p><text:span text:style-name="T3">Recherche d’informations sur les différentes bandes de fréquences</text:span></text:p>
      </table:table-cell>
      <table:table-cell/>
     </table:table-row>
@@ -389,7 +396,7 @@
      <table:table-cell office:value-type="date" office:date-value="2021-03-09" calcext:value-type="date">
       <text:p>09.03.21</text:p>
      </table:table-cell>
-     <table:table-cell office:value-type="string" calcext:value-type="string"><text:p>Recherche d’informations sur le climat au Vietnam.</text:p><text:p><text:span text:style-name="T1">Amélioration du script de téléchargement de carte pour pouvoir prendre plusieurs plage de temps.</text:span></text:p><text:p>Comparaison du café à travers des saisons («hiver», «été»).</text:p><text:p>Amélioration de la visualisation des résultats.</text:p>
+     <table:table-cell office:value-type="string" calcext:value-type="string"><text:p>Recherche d’informations sur le climat au Vietnam.</text:p><text:p><text:span text:style-name="T3">Amélioration du script de téléchargement de carte pour pouvoir prendre plusieurs plage de temps.</text:span></text:p><text:p>Comparaison du café à travers des saisons («hiver», «été»).</text:p><text:p>Amélioration de la visualisation des résultats.</text:p>
      </table:table-cell>
      <table:table-cell/>
     </table:table-row>
@@ -858,7 +865,7 @@
      <table:table-cell office:value-type="date" office:date-value="2021-06-12" calcext:value-type="date">
       <text:p>12.06.21</text:p>
      </table:table-cell>
-     <table:table-cell office:value-type="string" calcext:value-type="string"><text:p>Remplacer le système de génération de fold par <text:span text:style-name="T2">StratifiedKFold qui génère des folds en essayant de préserver la proportion de chaque classes dans les folds</text:span></text:p>
+     <table:table-cell office:value-type="string" calcext:value-type="string"><text:p>Remplacer le système de génération de fold par <text:span text:style-name="T4">StratifiedKFold qui génère des folds en essayant de préserver la proportion de chaque classes dans les folds</text:span></text:p>
      </table:table-cell>
      <table:table-cell/>
     </table:table-row>
@@ -875,7 +882,7 @@
      <table:table-cell office:value-type="date" office:date-value="2021-06-15" calcext:value-type="date">
       <text:p>15.06.21</text:p>
      </table:table-cell>
-     <table:table-cell office:value-type="string" calcext:value-type="string"><text:p><text:span text:style-name="T1">Réunion, dessin de la carte avec les endroits où le café est prédit et le endroits connus </text:span>de café </text:p>
+     <table:table-cell office:value-type="string" calcext:value-type="string"><text:p><text:span text:style-name="T3">Réunion, dessin de la carte avec les endroits où le café est prédit et le endroits connus </text:span>de café </text:p>
      </table:table-cell>
      <table:table-cell/>
     </table:table-row>
@@ -972,7 +979,7 @@
      <table:table-cell office:value-type="date" office:date-value="2021-07-01" calcext:value-type="date">
       <text:p>01.07.21</text:p>
      </table:table-cell>
-     <table:table-cell office:value-type="string" calcext:value-type="string"><text:p><text:span text:style-name="T1">Réunion avec l’équipe du Vietnam, peaufiner les projets QGIS et compressions des fichiers de rasters (method=zstd, predictor=3) pour les envoyer à l’équipe du Vietnam</text:span>,</text:p><text:p>Lire sur la méthode de pré-entraînement «REPTILE»</text:p>
+     <table:table-cell office:value-type="string" calcext:value-type="string"><text:p><text:span text:style-name="T3">Réunion avec l’équipe du Vietnam, peaufiner les projets QGIS et compressions des fichiers de rasters (method=zstd, predictor=3) pour les envoyer à l’équipe du Vietnam</text:span>,</text:p><text:p>Lire sur la méthode de pré-entraînement «REPTILE»</text:p>
      </table:table-cell>
      <table:table-cell/>
     </table:table-row>
